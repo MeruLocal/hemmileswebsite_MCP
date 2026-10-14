@@ -228,11 +228,11 @@ MCP `tools/call` request and the resulting `structuredContent` (abridged; **valu
   "currency": "INR",
   "plans": [
     // illustrative values only
-    { "name": "<plan name>", "price": 0, "priceCurrency": "INR",
+    { "name": "<plan name>", "price": "0", "priceCurrency": "INR",
       "unit": "per user per month", "minUsers": 1, "maxUsers": 1,
       "availability": "https://schema.org/InStock",
-      "billing": [ { "name": "Monthly billing", "price": 0 },
-                   { "name": "Annual billing",  "price": 0 } ] }
+      "billing": [ { "name": "Monthly billing", "price": "0" },
+                   { "name": "Annual billing",  "price": "0" } ] }
     // … other plans
   ]
 }
