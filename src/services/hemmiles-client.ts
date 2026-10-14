@@ -8,7 +8,10 @@
  *     transient failures (ECONNRESET / network / 5xx / 429).
  *   - Conservative rate limiting: requests are serialized with a configurable
  *     minimum spacing (the live site intermittently resets connections).
- *   - In-memory caching with TTL to avoid re-fetching the same page.
+ *   - In-memory caching with TTL to avoid re-fetching the same page, plus a
+ *     negative cache of NOT_FOUND URLs for the same TTL.
+ *   - Response guards: only HTML/XML content types, and bodies are capped at
+ *     MAX_RESPONSE_BYTES (checked on Content-Length and while streaming).
  *
  * It never logs URLs with query strings or response bodies, and holds no
  * credentials.
@@ -17,6 +20,17 @@
 import { assertAllowedUrl } from "../utils/validation.js";
 import { HemmilesError } from "../utils/errors.js";
 import type { ServerConfig } from "../config.js";
+import { MAX_RESPONSE_BYTES } from "../constants.js";
+
+/** Content types the client will read. Anything else is refused unread. */
+const ACCEPTED_CONTENT_TYPES = new Set([
+  "text/html",
+  "application/xhtml+xml",
+  "application/xml",
+  "text/xml",
+]);
+
+export type FetchImpl = (input: string, init?: RequestInit) => Promise<Response>;
 
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
 const MAX_REDIRECTS = 5;
@@ -57,12 +71,20 @@ function isTransientNetworkError(error: unknown): boolean {
 export class HemmilesClient {
   private readonly config: ServerConfig;
   private readonly cache = new Map<string, CacheEntry>();
+  /** URLs that returned NOT_FOUND, with their expiry (same TTL as the cache). */
+  private readonly missing = new Map<string, number>();
+  private readonly fetchImpl: FetchImpl;
   /** Serializes outbound requests so rate-limit spacing is honored. */
   private gate: Promise<void> = Promise.resolve();
   private lastRequestAt = 0;
 
-  constructor(config: ServerConfig) {
+  /**
+   * `fetchImpl` exists for tests only (to point at a local server). The URL
+   * allowlist is still enforced before it is called.
+   */
+  constructor(config: ServerConfig, fetchImpl: FetchImpl = (input, init) => fetch(input, init)) {
     this.config = config;
+    this.fetchImpl = fetchImpl;
   }
 
   /** Acquire the rate-limit slot: at most one request in flight, spaced out. */
@@ -96,12 +118,41 @@ export class HemmilesClient {
     this.cache.set(key, { value, expires: Date.now() + this.config.cacheTtlMs });
   }
 
-  /** Perform a single fetch with an AbortController timeout. */
-  private async fetchOnce(url: string): Promise<Response> {
+  private isKnownMissing(key: string): boolean {
+    if (this.config.cacheTtlMs <= 0) return false;
+    const expires = this.missing.get(key);
+    if (expires === undefined) return false;
+    if (expires < Date.now()) {
+      this.missing.delete(key);
+      return false;
+    }
+    return true;
+  }
+
+  private setMissing(key: string): void {
+    if (this.config.cacheTtlMs <= 0) return;
+    this.missing.set(key, Date.now() + this.config.cacheTtlMs);
+  }
+
+  /**
+   * Return a cached page without any network access, or undefined. Lets
+   * callers (deep search) score already-cached pages for free.
+   */
+  peekCached(url: string): FetchResult | undefined {
+    const cached = this.getCached(url);
+    return cached === undefined ? undefined : { url, status: 200, html: cached };
+  }
+
+  /**
+   * Perform a single fetch with an AbortController timeout. The timeout keeps
+   * running until `done()` is called, so it also bounds reading the body.
+   */
+  private async fetchOnce(url: string): Promise<{ res: Response; controller: AbortController; done: () => void }> {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.config.timeoutMs);
+    const done = () => clearTimeout(timer);
     try {
-      return await fetch(url, {
+      const res = await this.fetchImpl(url, {
         method: "GET",
         redirect: "manual",
         signal: controller.signal,
@@ -111,14 +162,49 @@ export class HemmilesClient {
           "Accept-Language": "en",
         },
       });
+      return { res, controller, done };
     } catch (error) {
+      done();
       if ((error as Error)?.name === "AbortError") {
         throw new HemmilesError("TIMEOUT", `Request to ${url} timed out after ${this.config.timeoutMs}ms.`);
       }
       throw error;
-    } finally {
-      clearTimeout(timer);
     }
+  }
+
+  /**
+   * Read a response body as text, refusing non-HTML/XML content types and
+   * bodies larger than MAX_RESPONSE_BYTES (declared or streamed).
+   */
+  private async readCapped(res: Response, controller: AbortController): Promise<string> {
+    const type = (res.headers.get("content-type") ?? "").split(";")[0]?.trim().toLowerCase() ?? "";
+    // A missing Content-Type is tolerated; a present, non-HTML/XML one is not.
+    if (type !== "" && !ACCEPTED_CONTENT_TYPES.has(type)) {
+      controller.abort();
+      throw new HemmilesError("HTTP_ERROR", `Unexpected content type "${type}".`);
+    }
+    const declared = Number.parseInt(res.headers.get("content-length") ?? "", 10);
+    if (!Number.isNaN(declared) && declared > MAX_RESPONSE_BYTES) {
+      controller.abort();
+      throw new HemmilesError("HTTP_ERROR", `Response too large (over ${MAX_RESPONSE_BYTES} bytes).`);
+    }
+    if (!res.body) return "";
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder("utf-8");
+    let total = 0;
+    let text = "";
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > MAX_RESPONSE_BYTES) {
+        controller.abort();
+        await reader.cancel().catch(() => undefined);
+        throw new HemmilesError("HTTP_ERROR", `Response too large (over ${MAX_RESPONSE_BYTES} bytes).`);
+      }
+      text += decoder.decode(value, { stream: true });
+    }
+    return text + decoder.decode();
   }
 
   /** Follow redirects manually, validating each hop against the allowlist. */
@@ -126,34 +212,42 @@ export class HemmilesClient {
     let current = assertAllowedUrl(startUrl).toString();
     for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
       await this.acquireSlot();
-      const res = await this.fetchOnce(current);
-
-      if (REDIRECT_STATUSES.has(res.status)) {
-        const location = res.headers.get("location");
-        if (!location) {
-          throw new HemmilesError("HTTP_ERROR", `Redirect ${res.status} without a Location header.`, res.status);
+      const { res, controller, done } = await this.fetchOnce(current);
+      try {
+        if (REDIRECT_STATUSES.has(res.status)) {
+          const location = res.headers.get("location");
+          if (!location) {
+            throw new HemmilesError("HTTP_ERROR", `Redirect ${res.status} without a Location header.`, res.status);
+          }
+          const next = new URL(location, current).toString();
+          assertAllowedUrl(next); // reject off-site / downgraded redirects
+          current = next;
+          continue;
         }
-        const next = new URL(location, current).toString();
-        assertAllowedUrl(next); // reject off-site / downgraded redirects
-        current = next;
-        continue;
-      }
 
-      if (res.status === 404 || res.status === 410) {
-        throw new HemmilesError("NOT_FOUND", `${current} returned HTTP ${res.status}.`, res.status);
-      }
-      if (res.status === 429) {
-        throw new HemmilesError("RATE_LIMITED", `${current} returned HTTP 429 (too many requests).`, 429);
-      }
-      if (res.status >= 500) {
-        throw new HemmilesError("HTTP_ERROR", `${current} returned server error HTTP ${res.status}.`, res.status);
-      }
-      if (res.status >= 400) {
-        throw new HemmilesError("HTTP_ERROR", `${current} returned HTTP ${res.status}.`, res.status);
-      }
+        if (res.status === 404 || res.status === 410) {
+          throw new HemmilesError("NOT_FOUND", `${current} returned HTTP ${res.status}.`, res.status);
+        }
+        if (res.status === 429) {
+          throw new HemmilesError("RATE_LIMITED", `${current} returned HTTP 429 (too many requests).`, 429);
+        }
+        if (res.status >= 500) {
+          throw new HemmilesError("HTTP_ERROR", `${current} returned server error HTTP ${res.status}.`, res.status);
+        }
+        if (res.status >= 400) {
+          throw new HemmilesError("HTTP_ERROR", `${current} returned HTTP ${res.status}.`, res.status);
+        }
 
-      const html = await res.text();
-      return { url: current, status: res.status, html };
+        const html = await this.readCapped(res, controller);
+        return { url: current, status: res.status, html };
+      } catch (error) {
+        if ((error as Error)?.name === "AbortError") {
+          throw new HemmilesError("TIMEOUT", `Request to ${current} timed out after ${this.config.timeoutMs}ms.`);
+        }
+        throw error;
+      } finally {
+        done();
+      }
     }
     throw new HemmilesError("TOO_MANY_REDIRECTS", `Exceeded ${MAX_REDIRECTS} redirects starting at ${startUrl}.`);
   }
@@ -169,6 +263,9 @@ export class HemmilesClient {
     if (cached !== undefined) {
       return { url, status: 200, html: cached };
     }
+    if (this.isKnownMissing(url)) {
+      throw new HemmilesError("NOT_FOUND", `${url} returned HTTP 404 (cached).`, 404);
+    }
 
     let lastError: unknown;
     for (let attempt = 0; attempt <= this.config.maxRetries; attempt++) {
@@ -180,6 +277,7 @@ export class HemmilesClient {
         return result;
       } catch (error) {
         lastError = error;
+        if (error instanceof HemmilesError && error.code === "NOT_FOUND") this.setMissing(url);
         const retryable =
           isTransientNetworkError(error) ||
           (error instanceof HemmilesError &&
@@ -201,5 +299,6 @@ export class HemmilesClient {
   /** Clear the in-memory cache (used by tests). */
   clearCache(): void {
     this.cache.clear();
+    this.missing.clear();
   }
 }

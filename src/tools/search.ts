@@ -5,12 +5,14 @@
  * search API (and /api is robots-disallowed), so search is implemented by
  * matching the query against sitemap-derived page slugs and, when deep search
  * is enabled, against each page's fetched title/description/body text. Network
- * load is bounded by MAX_SEARCH_FETCH and the client cache.
+ * load is bounded by `max_pages` (default DEFAULT_DEEP_FETCH, hard cap
+ * MAX_SEARCH_FETCH): only UNCACHED pages count against it, and pages already in
+ * the client cache are scored without any network call.
  */
 
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { MAX_SEARCH_FETCH } from "../constants.js";
+import { DEFAULT_DEEP_FETCH, MAX_SEARCH_FETCH } from "../constants.js";
 import {
   localeSchema,
   responseFormatSchema,
@@ -40,6 +42,15 @@ const SearchInput = {
     .boolean()
     .default(true)
     .describe("If true, fetch page bodies for full-text matching and snippets (slower). If false, match slugs only."),
+  max_pages: z
+    .number()
+    .int()
+    .min(1)
+    .max(MAX_SEARCH_FETCH)
+    .default(DEFAULT_DEEP_FETCH)
+    .describe(
+      `Deep search only: maximum number of uncached pages to fetch (1–${MAX_SEARCH_FETCH}, default ${DEFAULT_DEEP_FETCH}). Higher finds more body-text matches but is slower.`,
+    ),
   limit: limitSchema,
   offset: offsetSchema,
   response_format: responseFormatSchema,
@@ -76,6 +87,7 @@ Args:
   - section (string, optional): restrict to one section (e.g. 'guides', 'features').
   - locale (optional): market whose URLs to return (default: server locale).
   - deep (boolean, default true): fetch page bodies for full-text matches + snippets. Set false for a fast slug-only match.
+  - max_pages (1–${MAX_SEARCH_FETCH}, default ${DEFAULT_DEEP_FETCH}): deep search fetches at most this many uncached pages, most promising slugs first; already-cached pages are scored for free. Raise it for long-tail body-text matches (slower).
   - limit (1–50, default 20), offset (default 0): pagination.
   - response_format ('markdown'|'json').
 
@@ -128,7 +140,7 @@ Note: results are ranked by keyword relevance in titles, descriptions, slugs and
           })
           .sort((a, b) => b.slugScore - a.slugScore);
 
-        const fetchBudget = args.deep ? MAX_SEARCH_FETCH : 0;
+        const fetchBudget = args.deep ? Math.min(args.max_pages, MAX_SEARCH_FETCH) : 0;
         let fetched = 0;
 
         interface Row {
@@ -147,10 +159,12 @@ Note: results are ranked by keyword relevance in titles, descriptions, slugs and
           let title: string | undefined;
           let snippet: string | undefined;
 
-          if (args.deep && fetched < fetchBudget) {
-            fetched++;
+          // Cached pages are free; only uncached fetches consume the budget.
+          const cached = args.deep ? ctx.client.peekCached(url) : undefined;
+          if (args.deep && (cached !== undefined || fetched < fetchBudget)) {
+            if (cached === undefined) fetched++;
             try {
-              const res = await ctx.client.fetchHtml(url);
+              const res = cached ?? (await ctx.client.fetchHtml(url));
               const page = normalizePage(res.html, res.url);
               title = page.title;
               const haystackTitle = (page.title ?? "").toLowerCase();

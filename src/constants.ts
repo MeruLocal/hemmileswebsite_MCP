@@ -9,8 +9,11 @@
 /** Canonical origin. The server restricts all requests to this host. */
 export const BASE_ORIGIN = "https://hemmiles.com";
 
-/** The only host the client is permitted to contact (SSRF allowlist). */
-export const ALLOWED_HOSTS: readonly string[] = ["hemmiles.com"];
+/**
+ * The only hosts the client is permitted to contact (SSRF allowlist). Exact
+ * matches: other subdomains are NOT allowed unless listed here.
+ */
+export const ALLOWED_HOSTS: readonly string[] = ["hemmiles.com", "www.hemmiles.com"];
 
 /**
  * robots.txt disallows `/api/` for every user agent, so the client refuses
@@ -94,6 +97,17 @@ export const CHARACTER_LIMIT = 25000;
 
 /** Hard cap on pages fetched for a single deep search, to bound load. */
 export const MAX_SEARCH_FETCH = 24;
+
+/**
+ * Default number of UNCACHED pages a deep search fetches. Every fetch is
+ * spaced by HEMMILES_MIN_REQUEST_INTERVAL_MS process-wide, so 8 keeps a cold
+ * search to roughly 8 x 600 ms of spacing. Callers can raise it with
+ * `max_pages` (up to MAX_SEARCH_FETCH). Cached pages are scored for free.
+ */
+export const DEFAULT_DEEP_FETCH = 8;
+
+/** Largest upstream response body the client will read (2 MB). */
+export const MAX_RESPONSE_BYTES = 2 * 1024 * 1024;
 
 export const SERVER_NAME = "hemmiles-mcp-server";
 export const SERVER_VERSION = "1.0.0";

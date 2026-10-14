@@ -11,11 +11,13 @@ import {
 } from "../src/utils/validation.ts";
 import { HemmilesError } from "../src/utils/errors.ts";
 
-test("isAllowedHost accepts hemmiles.com and subdomains only", () => {
+test("isAllowedHost accepts hemmiles.com and www.hemmiles.com only", () => {
   assert.equal(isAllowedHost("hemmiles.com"), true);
   assert.equal(isAllowedHost("www.hemmiles.com"), true);
   assert.equal(isAllowedHost("evil.com"), false);
   assert.equal(isAllowedHost("hemmiles.com.evil.com"), false);
+  assert.equal(isAllowedHost("evil.hemmiles.com"), false);
+  assert.equal(isAllowedHost("WWW.Hemmiles.com"), true);
 });
 
 test("isDisallowedPath blocks /api per robots.txt", () => {
