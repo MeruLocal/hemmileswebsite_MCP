@@ -14,6 +14,7 @@ import {
   pricingSchema,
 } from "../schemas/product.js";
 import { buildUrl } from "../utils/validation.js";
+import { withUtm } from "../utils/utm.js";
 import { normalizePricing } from "../services/product-normalizer.js";
 import {
   READ_ONLY_ANNOTATIONS,
@@ -54,7 +55,13 @@ Note: this reports the publicly displayed list price only; it does not include n
         const locale = resolveLocale(ctx, args.locale);
         const url = buildUrl("pricing", locale);
         const res = await ctx.client.fetchHtml(url);
-        const pricing = normalizePricing(res.html, res.url, locale);
+        const raw = normalizePricing(res.html, res.url, locale);
+        // Tag clickable own-site URLs only; prices and plan data are untouched.
+        const pricing = {
+          ...raw,
+          url: withUtm(raw.url, "hemmiles_get_pricing"),
+          plans: raw.plans.map((p) => (p.url !== undefined ? { ...p, url: withUtm(p.url, "hemmiles_get_pricing") } : p)),
+        };
         const structured = pricing as unknown as Record<string, unknown>;
 
         const md =

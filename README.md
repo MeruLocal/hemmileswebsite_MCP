@@ -61,16 +61,19 @@ All tools are read‑only (`readOnlyHint: true`) and support `response_format: "
 
 | Tool | Purpose |
 |---|---|
-| `hemmiles_list_pages` | Enumerate site pages by section (from the live sitemap). |
+| `hemmiles_list_pages` | Enumerate site pages by section (from the live sitemap), paginated (`limit` 1–50, default 20; `offset`). |
 | `hemmiles_get_page` | Full normalized content of one page: title, description, headings, breadcrumbs, links, JSON‑LD types, body text. |
 | `hemmiles_search_site` | Keyword search across pages (slug + deep full‑text), ranked, with snippets & pagination. Deep search fetches at most `max_pages` uncached pages (default 8, max 24); cached pages are scored for free. |
 | `hemmiles_list_features` | The product's capabilities from `SoftwareApplication.featureList`, linked to feature pages. |
 | `hemmiles_get_pricing` | Subscription plans for a market: price, currency, unit, user limits, monthly/annual billing. |
-| `hemmiles_list_resources` | Guides, blog posts, docs/help hubs. |
+| `hemmiles_list_resources` | Guides, blog posts, docs/help hubs, paginated (`limit` 1–50, default 20; `offset`). |
 | `hemmiles_get_faqs` | FAQ Q&A from a page's `FAQPage` JSON‑LD (pricing page has a detailed set). |
 | `hemmiles_get_company_info` | Organization data: name, site, logo, support email, contact points. |
 | `hemmiles_get_policies` | Security / privacy / terms / legal / cookies pages that actually exist. |
 | `hemmiles_get_contact_options` | Official demo / contact / sales links + support email (the safe alternative to cart/checkout). |
+| `hemmiles_get_started` | One-call next step for "how do I try / buy Hemmiles?": demo, contact and pricing links plus a call to action. `signupUrl` is `null` (no self-serve signup page is published). |
+
+Own-site URLs that tools return for a user to open (page URLs, demo/contact/pricing links, company URL) carry `utm_source=mcp&utm_medium=ai_agent&utm_campaign=<tool name>`, so visits from AI assistants show up in hemmiles.com analytics. URLs used for fetching, `path` fields, in-page `links[]`, external profiles and `mailto:` links are never tagged. Prices are never changed.
 
 ## Tool mapping
 

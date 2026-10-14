@@ -20,10 +20,12 @@ import {
   offsetSchema,
 } from "../schemas/product.js";
 import { buildUrl } from "../utils/validation.js";
+import { withUtm } from "../utils/utm.js";
 import { normalizePage } from "../services/product-normalizer.js";
 import { makeSnippet, squashWhitespace } from "../utils/format.js";
 import {
   READ_ONLY_ANNOTATIONS,
+  paginate,
   resolveLocale,
   runTool,
   success,
@@ -194,18 +196,18 @@ Note: results are ranked by keyword relevance in titles, descriptions, slugs and
 
         rows.sort((a, b) => b.score - a.score || a.path.localeCompare(b.path));
 
-        const total = rows.length;
-        const paged = rows.slice(args.offset, args.offset + args.limit);
-        const hasMore = args.offset + paged.length < total;
+        const page = paginate(rows, args.offset, args.limit);
+        const total = page.total;
+        const paged = page.rows.map((r) => ({ ...r, url: withUtm(r.url, "hemmiles_search_site") }));
         const structured: Record<string, unknown> = {
           query: args.query,
           total,
-          count: paged.length,
-          offset: args.offset,
-          has_more: hasMore,
+          count: page.count,
+          offset: page.offset,
+          has_more: page.has_more,
           results: paged,
         };
-        if (hasMore) structured.next_offset = args.offset + paged.length;
+        if (page.next_offset !== undefined) structured.next_offset = page.next_offset;
 
         const md =
           paged.length === 0

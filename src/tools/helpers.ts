@@ -64,6 +64,40 @@ export async function runTool(fn: () => Promise<ToolResult>): Promise<ToolResult
   }
 }
 
+export interface Page<T> {
+  rows: T[];
+  total: number;
+  offset: number;
+  count: number;
+  has_more: boolean;
+  next_offset?: number;
+}
+
+/** Slice already-filtered, already-sorted rows into one page. */
+export function paginate<T>(rows: readonly T[], offset: number, limit: number): Page<T> {
+  const start = Math.max(0, Math.floor(offset));
+  const size = Math.max(0, Math.floor(limit));
+  const slice = rows.slice(start, start + size);
+  const hasMore = start + slice.length < rows.length;
+  const page: Page<T> = { rows: slice, total: rows.length, offset: start, count: slice.length, has_more: hasMore };
+  if (hasMore) page.next_offset = start + slice.length;
+  return page;
+}
+
+/** Fields of a Page for structuredContent (everything except the rows). */
+export function pageMeta<T>(p: Page<T>): Record<string, unknown> {
+  const meta: Record<string, unknown> = { total: p.total, count: p.count, offset: p.offset, has_more: p.has_more };
+  if (p.next_offset !== undefined) meta.next_offset = p.next_offset;
+  return meta;
+}
+
+/** "Showing X–Y of N." plus a next-offset hint when there is more. */
+export function pageLine<T>(p: Page<T>): string {
+  if (p.count === 0) return `Showing 0 of ${p.total}.`;
+  const line = `Showing ${p.offset + 1}–${p.offset + p.count} of ${p.total}.`;
+  return p.next_offset !== undefined ? `${line} Use offset=${p.next_offset} for more.` : line;
+}
+
 export const READ_ONLY_ANNOTATIONS = {
   readOnlyHint: true,
   destructiveHint: false,
