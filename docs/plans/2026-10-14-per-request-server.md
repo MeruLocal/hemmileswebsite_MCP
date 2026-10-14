@@ -53,3 +53,9 @@ A prototype of this design was run before the switch to plan-only. The concurren
 - Building a server per request re-registers 10 tools (cheap). Caches stay shared, so outbound load on hemmiles.com does not change.
 - The HTTP-hardening plan touches the same handler and should be implemented after this one.
 - No founder decision needed.
+
+## Re-audit correction (2026-10-14, new audit script)
+
+- The statement "`audit-live-mcp.mjs` does not test concurrency" is out of date. The new script has `X.concurrency`, and on `main` it reports **PASS**: "8 parallel hemmiles_list_pages calls all succeeded (max 54 ms)". That PASS is false: `list_pages` answers in ~11 ms once the sitemap fallback is cached, so the requests never overlap.
+- Reproduced by hand on the same build with a slower tool: 4 parallel `tools/call hemmiles_get_pricing` → `200, 400, 400, 200`; both 400s are `-32700 "Parse error: Already connected to a transport…"`. 8 parallel `list_pages` → all 200.
+- So the crash depends on tool latency, not on `list_pages` itself. When verifying the fix, run the script with `--sample-tool hemmiles_get_pricing` (or `hemmiles_search_site`) and keep the in-process test's 25 ms stub delay. The proposed fix is unchanged.
