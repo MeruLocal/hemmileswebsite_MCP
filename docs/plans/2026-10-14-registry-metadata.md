@@ -46,3 +46,10 @@ Not checked: whether `mcp.hemmiles.com` resolves (sandbox egress is blocked), or
 
 - **Decision (founder):** confirm `https://mcp.hemmiles.com/mcp` is the public endpoint, and choose the registry namespace (`io.github.merulocal/…` vs. a `com.hemmiles/…` domain-verified name).
 - **Decision (founder):** publish to npm or remote-only.
+
+## Re-audit correction (2026-10-14, new audit script)
+
+- New script output on `main` for this plan's area: `FAIL C13.well_known the manifest hand-lists tools`. The old "`/version` says undefined tools" FAIL and the `mcp_endpoint` WARN are no longer emitted by the new script; the fix for them still stands.
+- **Measured:** `https://registry.npmjs.org/hemmiles-mcp-server` → **404**. The name is unpublished (and appears free).
+- **Missed (B4 / C13):** `package.json` has no `repository`, `homepage` or `bugs` fields. Add `repository: { type: git, url: https://github.com/MeruLocal/hemmileswebsite_MCP }` and `homepage: https://hemmiles.com`. If the founder chooses npm publishing, the MCP Registry also requires **`"mcpName": "<the server.json name>"`** in `package.json` to verify package ownership; add it in the same change and assert it equals `server.json` `name` in `scripts/check-versions.mjs`.
+- The `author` field and the LICENSE copyright line stay as they are (legal-owner names are out of scope).
