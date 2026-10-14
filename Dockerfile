@@ -56,8 +56,11 @@ ENV NODE_ENV=production
 ENV HEMMILES_TRANSPORT=http
 ENV PORT=3001
 ENV HEMMILES_DEFAULT_LOCALE=in
-# Bind on every interface. Node's HTTP server already listens on all
-# interfaces by default; this is documented here for clarity.
+# Bind on every interface (read by the server as the listen address).
+# IMPORTANT: the /mcp Host allowlist defaults to loopback + mcp.hemmiles.com.
+# If the proxy forwards an IP or container name as Host, /mcp returns 403 while
+# /health stays green. Set MCP_ALLOWED_HOSTS (comma-separated hostnames) at run
+# time; /health shows the active list under "hostCheck".
 ENV HOST=0.0.0.0
 
 # Run as an unprivileged user.
