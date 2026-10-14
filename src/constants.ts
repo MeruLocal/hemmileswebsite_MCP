@@ -1,3 +1,5 @@
+import { createRequire } from "node:module";
+
 /**
  * Shared constants for the Hemmiles MCP server.
  *
@@ -110,4 +112,16 @@ export const DEFAULT_DEEP_FETCH = 8;
 export const MAX_RESPONSE_BYTES = 2 * 1024 * 1024;
 
 export const SERVER_NAME = "hemmiles-mcp-server";
-export const SERVER_VERSION = "1.0.0";
+
+/**
+ * Version read from package.json, so the runtime, /version and server.json
+ * cannot drift. `../package.json` resolves to the repo root from both `src/`
+ * (tsx) and `dist/` (compiled); the Docker image copies package.json too.
+ */
+export const SERVER_VERSION: string = (
+  createRequire(import.meta.url)("../package.json") as { version: string }
+).version;
+
+/** Public website and MCP endpoint path, advertised in discovery docs. */
+export const WEBSITE_URL = "https://hemmiles.com";
+export const MCP_ENDPOINT = "/mcp";
