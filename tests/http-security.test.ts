@@ -16,7 +16,7 @@ test("defaults: loopback + mcp.hemmiles.com hosts, 60/min, no proxy trust", () =
   assert.deepEqual(cfg.allowedHosts.sort(), ["127.0.0.1", "::1", "localhost", "mcp.hemmiles.com"].sort());
   assert.deepEqual(cfg.allowedOrigins, ["https://mcp.hemmiles.com"]);
   assert.equal(cfg.rateLimitPerMinute, DEFAULT_RATE_LIMIT_PER_MINUTE);
-  assert.equal(cfg.trustProxy, false);
+  assert.equal(cfg.trustProxy, 0);
   assert.equal(cfg.maxBodyBytes, 1024 * 1024);
 });
 
@@ -30,7 +30,10 @@ test("env overrides", () => {
   assert.deepEqual(cfg.allowedHosts, ["example.test", "other.test"]);
   assert.deepEqual(cfg.allowedOrigins, ["https://app.example.test"]);
   assert.equal(cfg.rateLimitPerMinute, 0);
-  assert.equal(cfg.trustProxy, true);
+  assert.equal(cfg.trustProxy, 1);
+  assert.equal(loadHttpSecurityConfig({ TRUST_PROXY: "2" }).trustProxy, 2);
+  assert.equal(loadHttpSecurityConfig({ TRUST_PROXY: "true" }).trustProxy, 1);
+  assert.equal(loadHttpSecurityConfig({ TRUST_PROXY: "junk" }).trustProxy, 0);
   assert.equal(loadHttpSecurityConfig({ MCP_RATE_LIMIT_PER_MINUTE: "-5" }).rateLimitPerMinute, 60);
 });
 
@@ -71,10 +74,14 @@ function fakeReq(remote: string, xff?: string): IncomingMessage {
   return { headers: xff ? { "x-forwarded-for": xff } : {}, socket: { remoteAddress: remote } } as unknown as IncomingMessage;
 }
 
-test("clientIp uses the socket unless TRUST_PROXY, then the right-most XFF hop", () => {
-  assert.equal(clientIp(fakeReq("10.0.0.1", "203.0.113.5, 198.51.100.7"), false), "10.0.0.1");
-  assert.equal(clientIp(fakeReq("10.0.0.1", "203.0.113.5, 198.51.100.7"), true), "198.51.100.7");
-  assert.equal(clientIp(fakeReq("10.0.0.1"), true), "10.0.0.1");
+test("clientIp: 0, 1 and 2 trusted hops, and a short header", () => {
+  const xff = "192.0.2.99, 203.0.113.5, 198.51.100.7";
+  assert.equal(clientIp(fakeReq("10.0.0.1", xff), 0), "10.0.0.1");
+  assert.equal(clientIp(fakeReq("10.0.0.1", xff), 1), "198.51.100.7");
+  assert.equal(clientIp(fakeReq("10.0.0.1", xff), 2), "203.0.113.5");
+  // Fewer entries than hops: fall back to the socket address.
+  assert.equal(clientIp(fakeReq("10.0.0.1", "198.51.100.7"), 2), "10.0.0.1");
+  assert.equal(clientIp(fakeReq("10.0.0.1"), 1), "10.0.0.1");
 });
 
 test("RateLimiter fixed window", () => {

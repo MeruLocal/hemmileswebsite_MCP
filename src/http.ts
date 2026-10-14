@@ -29,6 +29,8 @@ import {
 
 export interface HttpAppOptions {
   security?: HttpSecurityConfig;
+  /** Test/observability hook: called when a request body exceeds the cap. */
+  onBodyTooLarge?: (via: "content-length" | "stream") => void;
 }
 
 const PUBLIC_CORS = { "Access-Control-Allow-Origin": "*" };
@@ -69,6 +71,12 @@ export function createHttpApp(ctx: ToolContext, options: HttpAppOptions = {}): S
             locale,
             uptimeSeconds: Math.round((Date.now() - startedAt) / 1000),
             mcpEndpoint: "/mcp",
+            // Config only, no secrets: lets an operator see why /mcp may 403.
+            hostCheck: {
+              enabled: true,
+              allowedHosts: security.allowedHosts,
+              hint: "Set MCP_ALLOWED_HOSTS if the proxy forwards a different Host header.",
+            },
           },
           PUBLIC_CORS,
         );
@@ -84,7 +92,7 @@ export function createHttpApp(ctx: ToolContext, options: HttpAppOptions = {}): S
       }
     }
 
-    const isMcp = path.startsWith("/mcp");
+    const isMcp = path === "/mcp" || path === "/mcp/";
     if (isMcp && (req.method === "POST" || req.method === "OPTIONS")) {
       // Guards run before the body is read.
       if (!isHostAllowed(req.headers.host, security)) {
@@ -118,6 +126,7 @@ export function createHttpApp(ctx: ToolContext, options: HttpAppOptions = {}): S
         raw = await readBody(req, security.maxBodyBytes);
       } catch (error) {
         if (error instanceof BodyTooLargeError) {
+          options.onBodyTooLarge?.(error.via);
           sendJson(res, 413, rpcError(-32600, "Request body too large."), { ...cors, Connection: "close" });
           return;
         }
@@ -126,7 +135,7 @@ export function createHttpApp(ctx: ToolContext, options: HttpAppOptions = {}): S
 
       let body: unknown;
       try {
-        body = raw.length ? JSON.parse(raw.toString("utf8")) : undefined;
+        body = JSON.parse(raw.toString("utf8"));
       } catch {
         sendJson(res, 400, rpcError(-32700, "Parse error: request body is not valid JSON."), cors);
         return;
@@ -147,6 +156,10 @@ export function createHttpApp(ctx: ToolContext, options: HttpAppOptions = {}): S
         await transport.handleRequest(req, res, body);
       } catch (error) {
         console.error("MCP request failed:", (error as Error)?.message ?? error);
+        if (res.headersSent) {
+          res.destroy();
+          return;
+        }
         sendJson(res, 500, rpcError(-32603, "Internal server error."));
       }
       return;
@@ -163,7 +176,11 @@ export function createHttpApp(ctx: ToolContext, options: HttpAppOptions = {}): S
   return createNodeServer((req, res) => {
     handle(req, res).catch((error: unknown) => {
       console.error("HTTP handler error:", (error as Error)?.message ?? error);
-      if (!res.writableEnded) sendJson(res, 500, rpcError(-32603, "Internal server error."));
+      if (res.headersSent) {
+        res.destroy();
+      } else if (!res.writableEnded) {
+        sendJson(res, 500, rpcError(-32603, "Internal server error."));
+      }
     });
   });
 }
