@@ -34,8 +34,11 @@ export interface HttpSecurityConfig {
   allowedOrigins: string[];
   /** Requests per IP per minute on POST /mcp. 0 disables the limit. */
   rateLimitPerMinute: number;
-  /** When true, the client IP is the right-most X-Forwarded-For hop. */
-  trustProxy: boolean;
+  /**
+   * Number of trusted proxy hops in front of this server. 0 = use the socket
+   * address. N = the client IP is the X-Forwarded-For entry N from the right.
+   */
+  trustProxy: number;
   maxBodyBytes: number;
 }
 
@@ -64,6 +67,15 @@ function normalizeOrigin(value: string): string | undefined {
   }
 }
 
+/** `TRUST_PROXY`: a hop count; legacy `true`/`yes` mean 1; anything else is 0. */
+export function parseTrustProxy(value: string): number {
+  const v = value.trim().toLowerCase();
+  if (v === "true" || v === "yes") return 1;
+  if (!/^\d+$/.test(v)) return 0;
+  const n = Number.parseInt(v, 10);
+  return Number.isSafeInteger(n) ? Math.min(n, 16) : 0;
+}
+
 export function loadHttpSecurityConfig(env: Env = process.env): HttpSecurityConfig {
   const rawLimit = (env.MCP_RATE_LIMIT_PER_MINUTE ?? "").trim();
   const parsedLimit = Number.parseInt(rawLimit, 10);
@@ -80,7 +92,7 @@ export function loadHttpSecurityConfig(env: Env = process.env): HttpSecurityConf
       .map(normalizeOrigin)
       .filter((o): o is string => o !== undefined),
     rateLimitPerMinute,
-    trustProxy: trust === "1" || trust === "true" || trust === "yes",
+    trustProxy: parseTrustProxy(trust),
     maxBodyBytes: MAX_BODY_BYTES,
   };
 }
@@ -123,9 +135,14 @@ export function isOriginAllowed(origin: string | undefined, cfg: HttpSecurityCon
   return cfg.allowedOrigins.includes(u.origin.toLowerCase());
 }
 
-/** Client IP for rate limiting. */
-export function clientIp(req: IncomingMessage, trustProxy: boolean): string {
-  if (trustProxy) {
+/**
+ * Client IP for rate limiting. With `trustedHops` = N the client is the
+ * X-Forwarded-For entry at position `len - N` (counted from the right), so
+ * entries a client forges on the left are ignored. Falls back to the socket
+ * address when N is 0 or the header has fewer than N entries.
+ */
+export function clientIp(req: IncomingMessage, trustedHops: number): string {
+  if (trustedHops > 0) {
     const xff = req.headers["x-forwarded-for"];
     const raw = Array.isArray(xff) ? xff.join(",") : xff;
     if (raw) {
@@ -133,8 +150,10 @@ export function clientIp(req: IncomingMessage, trustProxy: boolean): string {
         .split(",")
         .map((s) => s.trim())
         .filter(Boolean);
-      const last = hops[hops.length - 1];
-      if (last) return last;
+      if (hops.length >= trustedHops) {
+        const ip = hops[hops.length - trustedHops];
+        if (ip) return ip;
+      }
     }
   }
   return req.socket.remoteAddress ?? "unknown";
@@ -195,7 +214,7 @@ export class RateLimiter {
 }
 
 export class BodyTooLargeError extends Error {
-  constructor() {
+  constructor(readonly via: "content-length" | "stream" = "stream") {
     super("Request body too large.");
     this.name = "BodyTooLargeError";
   }
@@ -207,13 +226,13 @@ export class BodyTooLargeError extends Error {
  */
 export async function readBody(req: IncomingMessage, maxBytes: number): Promise<Buffer> {
   const declared = Number.parseInt(String(req.headers["content-length"] ?? ""), 10);
-  if (!Number.isNaN(declared) && declared > maxBytes) throw new BodyTooLargeError();
+  if (!Number.isNaN(declared) && declared > maxBytes) throw new BodyTooLargeError("content-length");
   const chunks: Buffer[] = [];
   let total = 0;
   for await (const chunk of req) {
     const buf = chunk as Buffer;
     total += buf.length;
-    if (total > maxBytes) throw new BodyTooLargeError();
+    if (total > maxBytes) throw new BodyTooLargeError("stream");
     chunks.push(buf);
   }
   return Buffer.concat(chunks);

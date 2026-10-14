@@ -162,8 +162,10 @@ Note: results are ranked by keyword relevance in titles, descriptions, slugs and
           let snippet: string | undefined;
 
           // Cached pages are free; only uncached fetches consume the budget.
+          // Pages known missing (negative cache) cost nothing either: skip them.
           const cached = args.deep ? ctx.client.peekCached(url) : undefined;
-          if (args.deep && (cached !== undefined || fetched < fetchBudget)) {
+          const knownMissing = args.deep && cached === undefined && ctx.client.isKnownMissing(url);
+          if (args.deep && !knownMissing && (cached !== undefined || fetched < fetchBudget)) {
             if (cached === undefined) fetched++;
             try {
               const res = cached ?? (await ctx.client.fetchHtml(url));
