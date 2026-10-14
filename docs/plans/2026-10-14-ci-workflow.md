@@ -38,3 +38,9 @@ The workflow is the test. Verify with a draft PR run: green on the plan's branch
 
 - **Decision:** include ESLint now or later. Adding it brings dev dependencies and a possible one-off cleanup diff.
 - If branch protection should require this check, a repo admin must set that; CI cannot.
+
+## Re-audit correction (2026-10-14, new audit skill)
+
+- The audit skill (§4 D4) expects CI to also run `npm audit --omit=dev`. Add it as a step after `npm ci` (today: 0 vulnerabilities, re-measured 2026-10-14). Use `--audit-level=high` so a low-severity advisory does not block every PR.
+- Re-measured on `main` (14fc7e9): `npm ci` clean, `npm run typecheck` passes, `npm test` 23/23 pass (Node 22.22.0). Still no `.github/` directory.
+- The README grep checks proposed in the readme-hardcoded-facts and readme-personal-path plans can be added here as one optional `docs` step once those plans land.
