@@ -13,7 +13,7 @@ function html(i: number): string {
   return `<html><head><title>Page ${i}</title><meta name="description" content="About routes ${i}"></head><body><main><p>Offline routes for field teams, page ${i}.</p></main></body></html>`;
 }
 
-function stub(preCached: string[] = []) {
+function stub(preCached: string[] = [], missing: string[] = []) {
   const cache = new Map<string, FetchResult>();
   for (const url of preCached) {
     const i = Number(url.split("page-")[1]);
@@ -22,6 +22,7 @@ function stub(preCached: string[] = []) {
   const calls: string[] = [];
   const client = {
     peekCached: (url: string) => cache.get(url),
+    isKnownMissing: (url: string) => missing.includes(url),
     async fetchHtml(url: string): Promise<FetchResult> {
       calls.push(url);
       const i = Number(url.split("page-")[1]);
@@ -86,4 +87,12 @@ test("results stay ranked and paginated", async () => {
   }
   const slugOnly = await search(stub().ctx, { query: "page", deep: false });
   assert.equal(slugOnly.total, 30, "slug-only search still matches every page by slug");
+});
+
+test("known-missing pages do not consume the deep-search fetch budget", async () => {
+  const missing = PAGES.slice(0, 5).map((p) => `https://hemmiles.com/${p.path}`);
+  const { ctx, calls } = stub([], missing);
+  await search(ctx, { query: "routes", deep: true, max_pages: 3 });
+  assert.equal(calls.length, 3);
+  assert.ok(calls.every((u) => !missing.includes(u)));
 });

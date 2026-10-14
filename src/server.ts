@@ -47,12 +47,20 @@ export interface Icon {
   sizes?: string[];
 }
 
-/** Icon list for a configured icon URL (HEMMILES_ICON_URL), else undefined. */
+/**
+ * Icon list for a configured icon URL (HEMMILES_ICON_URL), else undefined.
+ * SVG icons are "any" size. PNG icons use "WxH": taken from a `256x256`-style
+ * token in the file name when present, otherwise `sizes` is left out.
+ */
 export function iconsFor(url: string | undefined): Icon[] | undefined {
   if (!url) return undefined;
   const path = new URL(url).pathname.toLowerCase();
-  const mimeType = path.endsWith(".svg") ? "image/svg+xml" : path.endsWith(".png") ? "image/png" : undefined;
-  return [mimeType ? { src: url, mimeType, sizes: ["any"] } : { src: url, sizes: ["any"] }];
+  if (path.endsWith(".svg")) return [{ src: url, mimeType: "image/svg+xml", sizes: ["any"] }];
+  if (path.endsWith(".png")) {
+    const m = /(\d{2,4})x(\d{2,4})/.exec(path);
+    return [m ? { src: url, mimeType: "image/png", sizes: [`${m[1]}x${m[2]}`] } : { src: url, mimeType: "image/png" }];
+  }
+  return [{ src: url }];
 }
 
 type ListToolsHandler = (req: unknown, extra: unknown) => Promise<{ tools: Array<Record<string, unknown>> }>;

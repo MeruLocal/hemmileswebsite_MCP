@@ -28,7 +28,9 @@ const ACCEPTED_CONTENT_TYPES = new Set([
   "application/xhtml+xml",
   "application/xml",
   "text/xml",
+  "text/plain",
 ]);
+// Any `application/*+xml` (e.g. application/atom+xml) is also accepted.
 
 export type FetchImpl = (input: string, init?: RequestInit) => Promise<Response>;
 
@@ -118,7 +120,8 @@ export class HemmilesClient {
     this.cache.set(key, { value, expires: Date.now() + this.config.cacheTtlMs });
   }
 
-  private isKnownMissing(key: string): boolean {
+  /** True when this URL is in the negative cache (a recent 404): no fetch needed. */
+  isKnownMissing(key: string): boolean {
     if (this.config.cacheTtlMs <= 0) return false;
     const expires = this.missing.get(key);
     if (expires === undefined) return false;
@@ -179,7 +182,7 @@ export class HemmilesClient {
   private async readCapped(res: Response, controller: AbortController): Promise<string> {
     const type = (res.headers.get("content-type") ?? "").split(";")[0]?.trim().toLowerCase() ?? "";
     // A missing Content-Type is tolerated; a present, non-HTML/XML one is not.
-    if (type !== "" && !ACCEPTED_CONTENT_TYPES.has(type)) {
+    if (type !== "" && !ACCEPTED_CONTENT_TYPES.has(type) && !type.endsWith("+xml") && type !== "text/plain") {
       controller.abort();
       throw new HemmilesError("HTTP_ERROR", `Unexpected content type "${type}".`);
     }
