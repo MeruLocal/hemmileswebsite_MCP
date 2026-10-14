@@ -1,3 +1,4 @@
+import { iconsFor } from "../src/server.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -147,4 +148,12 @@ test("HEMMILES_ICON_URL must be https on hemmiles.com", () => {
     if (saved === undefined) delete process.env.HEMMILES_ICON_URL;
     else process.env.HEMMILES_ICON_URL = saved;
   }
+});
+
+test("iconsFor: PNG uses WxH sizes, SVG uses any", () => {
+  assert.deepEqual(iconsFor("https://hemmiles.com/icon-256x256.png"), [
+    { src: "https://hemmiles.com/icon-256x256.png", mimeType: "image/png", sizes: ["256x256"] },
+  ]);
+  assert.equal(iconsFor("https://hemmiles.com/icon.png")?.[0]?.sizes, undefined);
+  assert.deepEqual(iconsFor("https://hemmiles.com/i.svg")?.[0]?.sizes, ["any"]);
 });
