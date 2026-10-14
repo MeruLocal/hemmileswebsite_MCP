@@ -128,6 +128,9 @@ When running with `HEMMILES_TRANSPORT=http`, the following informational endpoin
 | `GET /version` | Version/protocol JSON |
 | `GET /.well-known/mcp.json` | Discovery doc (transport, endpoint, tool names) |
 | `POST /mcp` | MCP JSON-RPC (Streamable HTTP) |
+| `OPTIONS /mcp` | CORS preflight (**204** for allowed origins) |
+
+Every `POST /mcp` gets its own MCP server instance, so overlapping requests are safe; the page cache, sitemap cache and outbound rate limit are shared. Requests to `/mcp` are checked before the body is read: `Host` and `Origin` allowlists (**403**), per‑IP rate limit (**429**), and a 1 MB body cap (**413**). The public `GET` docs above send `Access-Control-Allow-Origin: *`.
 
 ```bash
 curl http://localhost:3001/health
@@ -189,6 +192,11 @@ All environment variables are **optional** (no secrets required). See `.env.exam
 | `HEMMILES_MIN_REQUEST_INTERVAL_MS` | `600` | Minimum spacing between requests |
 | `HEMMILES_CACHE_TTL_SECONDS` | `300` | In‑memory cache TTL (0 disables) |
 | `HEMMILES_USER_AGENT` | `hemmiles-mcp-server/1.0 …` | Outbound User‑Agent |
+| `HOST` | *(unset: all interfaces)* | HTTP listen address, e.g. `127.0.0.1` |
+| `MCP_ALLOWED_HOSTS` | `localhost,127.0.0.1,[::1],::1,mcp.hemmiles.com` | HTTP: `Host` header allowlist (hostname only, port ignored). Other hosts get **403**. |
+| `MCP_ALLOWED_ORIGINS` | `https://mcp.hemmiles.com` | HTTP: browser `Origin` allowlist. Loopback origins on any port are always allowed; requests without `Origin` (agents, curl) are allowed. |
+| `MCP_RATE_LIMIT_PER_MINUTE` | `60` | HTTP: `POST /mcp` requests per client IP per minute (**429** + `Retry-After` above it). `0` = off. |
+| `TRUST_PROXY` | *(unset)* | HTTP: `1` = take the client IP from the right‑most `X-Forwarded-For` hop. Leave unset unless the proxy in front sets it to the real client IP. |
 
 ## Example conversations
 
@@ -288,7 +296,10 @@ Hemmiles_MCP/
 ├── README.md
 ├── src/
 │   ├── index.ts                  # entry point + transport selection
-│   ├── server.ts                 # wires config → client → tools
+│   ├── server.ts                 # shared tool context + per-request McpServer factory
+│   ├── http.ts                   # Streamable HTTP handler (/mcp + public GET docs)
+│   ├── http-security.ts          # Host/Origin allowlists, CORS, rate limit, body cap
+│   ├── http-pages.ts             # landing page, /version, /.well-known/mcp.json
 │   ├── config.ts                 # env configuration
 │   ├── constants.ts              # hosts, locales, page list, limits
 │   ├── schemas/product.ts        # Zod input + output schemas
@@ -305,6 +316,7 @@ Hemmiles_MCP/
     ├── fixtures.ts
     ├── validation.test.ts  normalizer.test.ts
     ├── client.test.ts  format.test.ts
+    ├── http.test.ts  http-security.test.ts  http-helpers.ts
 ```
 
 ## License

@@ -8,6 +8,8 @@ import { LOCALES, type Locale } from "./constants.js";
 export interface ServerConfig {
   transport: "stdio" | "http";
   port: number;
+  /** Listen address for the HTTP transport. Unset = all interfaces. */
+  host?: string;
   defaultLocale: Locale;
   timeoutMs: number;
   maxRetries: number;
@@ -34,6 +36,7 @@ export function loadConfig(): ServerConfig {
   return {
     transport: transport === "http" ? "http" : "stdio",
     port: intEnv("PORT", 3000, 1, 65535),
+    host: (process.env.HOST ?? "").trim() || undefined,
     defaultLocale: localeEnv("HEMMILES_DEFAULT_LOCALE", "in"),
     timeoutMs: intEnv("HEMMILES_TIMEOUT_MS", 20000, 1000, 60000),
     maxRetries: intEnv("HEMMILES_MAX_RETRIES", 3, 0, 5),
