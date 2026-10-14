@@ -47,3 +47,10 @@ Not checked: real end-to-end latency against hemmiles.com, and how often clients
 
 - A lower default budget can miss a body-text match on a low slug-score page. Callers can raise `max_pages`.
 - **Decision (founder):** whether to enable cache warm-up in production (extra steady load on hemmiles.com, much faster searches).
+
+## Re-audit correction (2026-10-14, new audit script)
+
+- **Now measured, not only derived.** Local build of `main`, egress blocked (every fetch fails fast with ENOTFOUND, which is not retried): one `hemmiles_search_site {query:"offline"}` with default `deep:true` took **15.0 s**. That is the 24 × 600 ms spacing floor alone (14.4 s). With a reachable site, response time adds to it.
+- The script flags it: `WARN X.amplification tools with fan-out arguments: hemmiles_search_site`.
+- **Missed fan-out in the same class:** `hemmiles_get_policies` with the default `topic:"all"` fetches up to **10 pages** (5 topics × localized + global URL, `src/tools/store.ts:127-151`), and `hemmiles_list_features` up to 3 (`src/tools/features.ts:64-72`). Both go through the same process-wide gate, so a default `get_policies` call costs ≥ 6 s of spacing and stalls other clients the same way.
+- Add to the proposed fix: `get_policies` tries the global URL only when the localized one is NOT_FOUND (already the order) **and** stops probing topics already known missing for the TTL (negative cache of NOT_FOUND per URL in `HemmilesClient`). Add a test: two `get_policies` calls within the TTL make no second fetch for a missing page.
