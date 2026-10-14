@@ -49,6 +49,7 @@ function sectionForWithLocaleStripped(canonicalPath: string): string {
 }
 
 export class SitemapService {
+  private loggedFallback = false;
   private readonly client: HemmilesClient;
   private cache: { entries: PageEntry[]; expires: number } | null = null;
   private readonly ttlMs: number;
@@ -99,12 +100,17 @@ export class SitemapService {
 
       if (entries.length === 0) throw new Error("empty sitemap");
 
-      this.cache = { entries, expires: Date.now() + this.ttlMs };
+      // TTL 0 (HEMMILES_CACHE_TTL_SECONDS=0) disables caching entirely.
+      if (this.ttlMs > 0) this.cache = { entries, expires: Date.now() + this.ttlMs };
       return entries;
-    } catch {
+    } catch (error) {
+      if (!this.loggedFallback) {
+        this.loggedFallback = true;
+        console.error("Sitemap unavailable, using static page list:", (error as Error)?.message ?? error);
+      }
       const entries = this.fallbackEntries();
       // Cache the fallback only briefly so we retry the live sitemap soon.
-      this.cache = { entries, expires: Date.now() + Math.min(this.ttlMs, 30000) };
+      if (this.ttlMs > 0) this.cache = { entries, expires: Date.now() + Math.min(this.ttlMs, 30000) };
       return entries;
     }
   }

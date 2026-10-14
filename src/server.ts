@@ -35,7 +35,7 @@ export const SERVER_INSTRUCTIONS =
 /** Build the shared, process-wide tool context (client, caches, rate-limit gate). */
 export function createToolContext(config: ServerConfig = loadConfig()): ToolContext {
   const client = new HemmilesClient(config);
-  const sitemap = new SitemapService(client, config.cacheTtlMs || 300000);
+  const sitemap = new SitemapService(client, config.cacheTtlMs);
   return { client, sitemap, config };
 }
 

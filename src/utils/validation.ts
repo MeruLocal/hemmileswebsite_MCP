@@ -3,7 +3,7 @@
  *
  * Every outbound request passes through `assertAllowedUrl`, which enforces:
  *   - https only
- *   - host is on the allowlist (hemmiles.com)
+ *   - host is on the allowlist (hemmiles.com, www.hemmiles.com; exact match)
  *   - path is not under a robots-disallowed prefix (/api/)
  *
  * `normalizeToPath` accepts either a bare path ("pricing", "/in/pricing") or a
@@ -20,8 +20,7 @@ import {
 import { HemmilesError } from "./errors.js";
 
 export function isAllowedHost(host: string): boolean {
-  const h = host.toLowerCase();
-  return ALLOWED_HOSTS.some((allowed) => h === allowed || h.endsWith(`.${allowed}`));
+  return ALLOWED_HOSTS.includes(host.toLowerCase());
 }
 
 export function isDisallowedPath(pathname: string): boolean {

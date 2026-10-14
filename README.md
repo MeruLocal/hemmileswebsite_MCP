@@ -48,9 +48,10 @@ Because content and pricing are delivered as JSON‑LD inside server‑rendered 
 - **Official MCP SDK** (`@modelcontextprotocol/sdk`), tools registered with `registerTool` (Zod input + output schemas, annotations, `structuredContent`).
 - **stdio** transport by default (for Claude Desktop); optional **Streamable HTTP** (`HEMMILES_TRANSPORT=http`).
 - **`HemmilesClient`** — the single network gateway:
-  - SSRF‑safe: HTTPS only, host allowlisted to `hemmiles.com`, **every redirect hop re‑validated**, `/api/` refused.
+  - SSRF‑safe: HTTPS only, host allowlisted to exactly `hemmiles.com` / `www.hemmiles.com` (no other subdomains), **every redirect hop re‑validated**, `/api/` refused.
+  - Response guards: only HTML/XML content types are read, and bodies are capped at 2 MB (on `Content-Length` and while streaming).
   - Resilient: per‑request timeout (AbortController), retry with exponential backoff on transient errors (ECONNRESET / 5xx / 429), manual redirect following.
-  - Conservative rate limiting (serialized requests with a configurable minimum interval) + in‑memory TTL cache.
+  - Conservative rate limiting (serialized requests with a configurable minimum interval) + in‑memory TTL cache, including a negative cache of `NOT_FOUND` URLs (so `hemmiles_get_policies` does not re‑probe missing pages within the TTL). `HEMMILES_CACHE_TTL_SECONDS=0` disables every cache, sitemap included.
 - **`product-normalizer`** — pure, JSON‑LD‑first extraction (via `cheerio`), unit‑tested with fixtures.
 - No secrets, no credentials, no writes, no transactions.
 
@@ -62,7 +63,7 @@ All tools are read‑only (`readOnlyHint: true`) and support `response_format: "
 |---|---|
 | `hemmiles_list_pages` | Enumerate site pages by section (from the live sitemap). |
 | `hemmiles_get_page` | Full normalized content of one page: title, description, headings, breadcrumbs, links, JSON‑LD types, body text. |
-| `hemmiles_search_site` | Keyword search across pages (slug + deep full‑text), ranked, with snippets & pagination. |
+| `hemmiles_search_site` | Keyword search across pages (slug + deep full‑text), ranked, with snippets & pagination. Deep search fetches at most `max_pages` uncached pages (default 8, max 24); cached pages are scored for free. |
 | `hemmiles_list_features` | The product's capabilities from `SoftwareApplication.featureList`, linked to feature pages. |
 | `hemmiles_get_pricing` | Subscription plans for a market: price, currency, unit, user limits, monthly/annual billing. |
 | `hemmiles_list_resources` | Guides, blog posts, docs/help hubs. |
@@ -270,7 +271,7 @@ The unit tests use HTML fixtures whose **structure** mirrors the live site (JSON
 
 - **Not an e‑commerce integration** — no products/cart/checkout/reviews/stock, because the site has none. See [Tool mapping](#tool-mapping).
 - **Pricing** reflects the publicly displayed list price only (monthly + annual as published); negotiated/promo pricing isn't exposed.
-- **Search** ranks by keyword relevance across titles/descriptions/slugs/body; deep full‑text fetching is bounded (`MAX_SEARCH_FETCH`) to limit load, so very long‑tail matches on huge sites could be capped (the site is small, ~31 canonical pages).
+- **Search** ranks by keyword relevance across titles/descriptions/slugs/body. Deep full‑text fetching is bounded by `max_pages` (default 8 uncached pages, hard cap `MAX_SEARCH_FETCH` = 24) because every outbound fetch is spaced by `HEMMILES_MIN_REQUEST_INTERVAL_MS` process‑wide. A body‑text match on a page with a low slug score can be missed on a cold cache; raise `max_pages` for long‑tail queries.
 - **Content changes** on the live site can change returned text; schema types are stable but values are live.
 - Relies on the site's JSON‑LD; if a page omits structured data, tools fall back to DOM parsing and may return less detail.
 
