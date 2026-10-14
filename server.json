@@ -1,0 +1,17 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.merulocal/hemmiles-mcp-server",
+  "description": "The official MCP server for Hemmiles: read-only access to public hemmiles.com content.",
+  "version": "1.0.0",
+  "repository": {
+    "url": "https://github.com/MeruLocal/hemmileswebsite_MCP",
+    "source": "github"
+  },
+  "websiteUrl": "https://hemmiles.com",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.hemmiles.com/mcp"
+    }
+  ]
+}

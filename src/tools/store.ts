@@ -38,8 +38,6 @@ export function registerStoreTools(server: McpServer, ctx: ToolContext): void {
       title: "Get Hemmiles company info",
       description: `Return Hemmiles' public company and contact information, parsed from the site's Organization JSON-LD: name, website, logo, support email, description, social profiles, and structured contact points (support, sales, etc.).
 
-This is the brief's "get_store_information" for a SaaS vendor.
-
 Args:
   - locale (optional): which market's page to read (org data is global; default: server locale).
   - response_format ('markdown'|'json').
@@ -85,7 +83,7 @@ Example: "How do I contact Hemmiles?" / "Who makes Hemmiles?".`,
       title: "Get Hemmiles policies",
       description: `Fetch Hemmiles' publicly available policy pages (security, privacy, terms, legal, cookies) and return their summaries.
 
-Important: Hemmiles is a digital SaaS subscription, so there is NO shipping policy and NO product return/refund policy in the e-commerce sense (the brief's get_shipping_information / get_return_policy do not apply). Billing, trial, and cancellation terms are covered by pricing FAQs (hemmiles_get_faqs) and the terms page when present. This tool reports only the policy pages that actually exist; missing ones are listed as unavailable.
+Important: Hemmiles is a digital SaaS subscription, so there is NO shipping policy and NO product return/refund policy in the e-commerce sense. Billing, trial, and cancellation terms are covered by pricing FAQs (hemmiles_get_faqs) and the terms page when present. This tool reports only the policy pages that actually exist; missing ones are listed as unavailable.
 
 Args:
   - topic ('all'|'security'|'privacy'|'terms'|'legal'|'cookies', default 'all').
@@ -181,7 +179,7 @@ Returns JSON: { note, found: [{ topic, url, title, description, excerpt }], unav
       title: "Get Hemmiles contact & demo options",
       description: `Return the official, supported ways to engage with Hemmiles: the sales/demo request page, the general contact page, and the support email — assembled from the site's Organization contact points and known pages.
 
-Why this instead of cart/checkout: Hemmiles has no online store, cart, or self-serve checkout, so the brief's add_to_cart / get_cart / remove_from_cart / create_checkout_link tools are not implemented. This tool is the safe, legitimate alternative — it only returns official links and never performs any transaction or submits any form.
+Why this instead of cart/checkout: Hemmiles has no online store, cart, or self-serve checkout, so there are no cart or checkout tools. This tool returns the official links instead and never performs any transaction or submits any form.
 
 Args:
   - locale (optional): market prefix for the page links (default: server locale).

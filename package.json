@@ -1,7 +1,7 @@
 {
   "name": "hemmiles-mcp-server",
   "version": "1.0.0",
-  "description": "MCP server exposing Hemmiles (hemmiles.com) field-visit SaaS marketing-site content — search, pages, features, pricing, resources, FAQs, company info — to MCP clients such as Claude Desktop.",
+  "description": "The official MCP server for Hemmiles (hemmiles.com) field-visit SaaS: read-only access to search, pages, features, pricing, resources, FAQs and company info for MCP clients such as Claude Desktop.",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
@@ -19,7 +19,8 @@
     "typecheck": "tsc --noEmit",
     "test": "node --import tsx --test tests/*.test.ts",
     "test:coverage": "node --import tsx --test --experimental-test-coverage tests/*.test.ts",
-    "inspector": "npm run build && npx @modelcontextprotocol/inspector node dist/index.js"
+    "inspector": "npm run build && npx @modelcontextprotocol/inspector node dist/index.js",
+    "check:versions": "node scripts/check-versions.mjs"
   },
   "engines": {
     "node": ">=18"
@@ -33,6 +34,14 @@
     "field-sales"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MeruLocal/hemmileswebsite_MCP.git"
+  },
+  "homepage": "https://hemmiles.com",
+  "bugs": {
+    "url": "https://github.com/MeruLocal/hemmileswebsite_MCP/issues"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.1",
     "cheerio": "^1.0.0",

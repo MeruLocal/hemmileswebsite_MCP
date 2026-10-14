@@ -1,6 +1,6 @@
 # Hemmiles MCP Server
 
-An unofficial, **read-only** [Model Context Protocol](https://modelcontextprotocol.io) server that lets MCP clients (Claude Desktop, MCP Inspector, etc.) query the public **[hemmiles.com](https://hemmiles.com)** website through structured tools.
+The official, **read-only** [Model Context Protocol](https://modelcontextprotocol.io) server that lets MCP clients (Claude Desktop, MCP Inspector, etc.) query the public **[hemmiles.com](https://hemmiles.com)** website through structured tools.
 
 > **Important — what Hemmiles actually is.** The site was inspected directly before any code was written. **Hemmiles is not an online store.** It is the marketing website for **Hemmiles, a B2B SaaS "field‑visit / field‑sales management" product** (visit planning, route planning, GPS check‑in, photos & notes, follow‑ups, manager dashboard, reports). There is **no product catalog, cart, checkout, stock, or customer reviews.** This server therefore exposes the site's *real* capabilities — content, features, pricing, resources, FAQs, and company/contact info — and does **not** fake e‑commerce actions that the site does not support. See [Tool mapping](#tool-mapping) and [Known limitations](#known-limitations).
 
@@ -37,7 +37,7 @@ An unofficial, **read-only** [Model Context Protocol](https://modelcontextprotoc
 | Root `/` | **HTTP 307** geo‑redirect to a locale (e.g. `/in`); redirects must be followed |
 | Locales | `global, in, us, gb, ca, au, nz, ie, sg, ae, za` |
 | Structured data | Rich **JSON‑LD** on every page: `SoftwareApplication` (name, `featureList`, `offers[]`), `Organization` (email, contact points), `WebPage`, `FAQPage`, `BreadcrumbList` |
-| Pricing | Per user / month, **locale‑specific currency** (e.g. India ₹3,500 / US $39 Starter). Monthly + annual billing in `offers[].priceSpecification[]` |
+| Pricing | Per user / month in the market's currency (INR for `in`, USD for `us`, …); call `hemmiles_get_pricing` for current figures. Monthly + annual billing in `offers[].priceSpecification[]` |
 | Reliability | Intermittent `ECONNRESET` (rate‑limiting) → retry/backoff + conservative throttling required |
 
 Because content and pricing are delivered as JSON‑LD inside server‑rendered HTML, **plain `fetch` is sufficient — Playwright is not used.**
@@ -106,8 +106,8 @@ This compiles TypeScript to `dist/`, with the entry point at `dist/index.js`.
 # stdio (default)
 npm start
 
-# Streamable HTTP on :3000 (POST JSON-RPC to /mcp)
-HEMMILES_TRANSPORT=http PORT=3000 npm start
+# Streamable HTTP on :3001 (POST JSON-RPC to /mcp)
+HEMMILES_TRANSPORT=http PORT=3001 npm start
 
 # Development (auto-reload, no build needed)
 npm run dev
@@ -126,8 +126,8 @@ When running with `HEMMILES_TRANSPORT=http`, the following informational endpoin
 |---|---|
 | `GET /` | HTML landing page (overview, endpoints, tool list, markets) — open it in a browser |
 | `GET /health`, `GET /healthz` | Liveness JSON `{status:"ok", version, uptimeSeconds, …}` |
-| `GET /version` | Version/protocol JSON |
-| `GET /.well-known/mcp.json` | Discovery doc (transport, endpoint, tool names) |
+| `GET /version` | Version/protocol JSON (version from `package.json`, protocol from the SDK, tool count, `mcp_endpoint`) |
+| `GET /.well-known/mcp.json` | Discovery doc (transport, `mcp_endpoint`, `websiteUrl`, tool **count**; `tools/list` is the source of tool names) |
 | `POST /mcp` | MCP JSON-RPC (Streamable HTTP) |
 | `OPTIONS /mcp` | CORS preflight (**204** for allowed origins) |
 
@@ -147,14 +147,14 @@ Open `http://localhost:3001/` in a browser to see the landing page. (stdio trans
 2. Open Claude Desktop → **Settings → Developer → Edit Config** (this opens `claude_desktop_config.json`).
 3. Add the server using the **absolute path to the compiled entry point**, then restart Claude Desktop.
 
-**Windows** (this machine's path):
+**Windows** (adjust the path):
 
 ```json
 {
   "mcpServers": {
     "hemmiles": {
       "command": "node",
-      "args": ["C:\\Users\\Hp\\Desktop\\Hemmiles_MCP\\dist\\index.js"],
+      "args": ["C:\\path\\to\\hemmileswebsite_MCP\\dist\\index.js"],
       "env": {
         "HEMMILES_DEFAULT_LOCALE": "in"
       }
@@ -170,7 +170,7 @@ Open `http://localhost:3001/` in a browser to see the landing page. (stdio trans
   "mcpServers": {
     "hemmiles": {
       "command": "node",
-      "args": ["/absolute/path/to/Hemmiles_MCP/dist/index.js"],
+      "args": ["/absolute/path/to/hemmileswebsite_MCP/dist/index.js"],
       "env": { "HEMMILES_DEFAULT_LOCALE": "us" }
     }
   }
@@ -186,13 +186,14 @@ All environment variables are **optional** (no secrets required). See `.env.exam
 | Variable | Default | Meaning |
 |---|---|---|
 | `HEMMILES_TRANSPORT` | `stdio` | `stdio` or `http` |
-| `PORT` | `3000` | HTTP transport port |
+| `PORT` | `3001` | HTTP transport port |
 | `HEMMILES_DEFAULT_LOCALE` | `in` | Default market (`global,in,us,gb,ca,au,nz,ie,sg,ae,za`) |
 | `HEMMILES_TIMEOUT_MS` | `20000` | Per‑request timeout (1000–60000) |
 | `HEMMILES_MAX_RETRIES` | `3` | Retries for transient errors (0–5) |
 | `HEMMILES_MIN_REQUEST_INTERVAL_MS` | `600` | Minimum spacing between requests |
 | `HEMMILES_CACHE_TTL_SECONDS` | `300` | In‑memory cache TTL (0 disables) |
 | `HEMMILES_USER_AGENT` | `hemmiles-mcp-server/1.0 …` | Outbound User‑Agent |
+| `HEMMILES_ICON_URL` | *(unset)* | https URL of an icon on `hemmiles.com`, advertised in `serverInfo`, every tool and `/.well-known/mcp.json`. Unset = no icons. |
 | `HOST` | *(unset: all interfaces)* | HTTP listen address, e.g. `127.0.0.1` |
 | `MCP_ALLOWED_HOSTS` | `localhost,127.0.0.1,[::1],::1,mcp.hemmiles.com` | HTTP: `Host` header allowlist (hostname only, port ignored). Other hosts get **403** on `/mcp` while `/health` stays green, so **set this in Docker/proxy deploys** if the proxy forwards an IP or container name as `Host` (or send `Host` through with `ProxyPreserveHost On`). `/health` reports the active list under `hostCheck`. |
 | `MCP_ALLOWED_ORIGINS` | `https://mcp.hemmiles.com` | HTTP: browser `Origin` allowlist. Loopback origins on any port are always allowed; requests without `Origin` (agents, curl) are allowed. |
@@ -203,7 +204,7 @@ All environment variables are **optional** (no secrets required). See `.env.exam
 
 **Discover and price:**
 > **User:** What does Hemmiles do, and how much is it in India?
-> **Claude:** *(calls `hemmiles_list_features` → Visit planning, Route planning, GPS check‑in, Photos & notes, Follow‑ups, Offline mode, Manager dashboard, Reports; then `hemmiles_get_pricing {locale:"in"}`)* Hemmiles is field‑visit software… India pricing is Starter **₹3,500**, Professional **₹4,500**, Enterprise **₹8,000** per user/month (annual billing is cheaper), with a 14‑day free trial.
+> **Claude:** *(calls `hemmiles_list_features` → Visit planning, Route planning, GPS check‑in, Photos & notes, Follow‑ups, Offline mode, Manager dashboard, Reports; then `hemmiles_get_pricing {locale:"in"}`)* Hemmiles is field‑visit software… *(current plans and prices from the pricing page, per user per month in INR)*
 
 **Research a capability:**
 > **User:** Does it work without signal? Show me the details.
@@ -215,7 +216,7 @@ All environment variables are **optional** (no secrets required). See `.env.exam
 
 ## Example tool calls
 
-MCP `tools/call` request and the resulting `structuredContent` (abridged, verified against the live site):
+MCP `tools/call` request and the resulting `structuredContent` (abridged; **values are illustrative**, not real prices or limits — call the tool for current figures):
 
 ```jsonc
 // hemmiles_get_pricing
@@ -226,12 +227,13 @@ MCP `tools/call` request and the resulting `structuredContent` (abridged, verifi
   "locale": "in",
   "currency": "INR",
   "plans": [
-    { "name": "Starter plan", "price": "3500", "priceCurrency": "INR",
-      "unit": "per user per month", "minUsers": 3, "maxUsers": 10,
+    // illustrative values only
+    { "name": "<plan name>", "price": "0", "priceCurrency": "INR",
+      "unit": "per user per month", "minUsers": 1, "maxUsers": 1,
       "availability": "https://schema.org/InStock",
-      "billing": [ { "name": "Monthly billing", "price": "3500" },
-                   { "name": "Annual billing",  "price": "2900" } ] }
-    // … Professional, Enterprise
+      "billing": [ { "name": "Monthly billing", "price": "0" },
+                   { "name": "Annual billing",  "price": "0" } ] }
+    // … other plans
   ]
 }
 ```
@@ -254,6 +256,7 @@ MCP `tools/call` request and the resulting `structuredContent` (abridged, verifi
 ```bash
 npm test        # unit tests (no network): validation, SSRF, normalizer, formatting
 npm run typecheck
+npm run check:versions   # package.json version == server.json version
 ```
 
 The unit tests use HTML fixtures whose **structure** mirrors the live site (JSON‑LD with numeric prices, array `priceSpecification`, `FAQPage`, `Organization`) but with test values. SSRF/robots rejections are asserted to happen **before** any network call.
@@ -265,11 +268,12 @@ The unit tests use HTML fixtures whose **structure** mirrors the live site (JSON
 - **SSRF‑hardened.** HTTPS + `hemmiles.com` only; every redirect hop re‑validated; arbitrary‑URL fetching is impossible.
 - **No sensitive logging.** No credentials exist; request logs avoid bodies.
 - **Rate‑limited & cached** to be a good citizen of the site.
-- Unofficial and not affiliated with Hemmiles.
+- Published by Hemmiles as its official MCP server.
 
 ## Known limitations
 
 - **Not an e‑commerce integration** — no products/cart/checkout/reviews/stock, because the site has none. See [Tool mapping](#tool-mapping).
+- **No figures are hard-coded in this repo.** Prices, user limits and trial terms always come live from the pricing page via `hemmiles_get_pricing` / `hemmiles_get_faqs`; README examples use placeholders.
 - **Pricing** reflects the publicly displayed list price only (monthly + annual as published); negotiated/promo pricing isn't exposed.
 - **Search** ranks by keyword relevance across titles/descriptions/slugs/body. Deep full‑text fetching is bounded by `max_pages` (default 8 uncached pages, hard cap `MAX_SEARCH_FETCH` = 24) because every outbound fetch is spaced by `HEMMILES_MIN_REQUEST_INTERVAL_MS` process‑wide. A body‑text match on a page with a low slug score can be missed on a cold cache; raise `max_pages` for long‑tail queries.
 - **Content changes** on the live site can change returned text; schema types are stable but values are live.
@@ -288,8 +292,9 @@ The unit tests use HTML fixtures whose **structure** mirrors the live site (JSON
 ## Project structure
 
 ```
-Hemmiles_MCP/
+hemmileswebsite_MCP/
 ├── package.json
+├── server.json                   # MCP Registry metadata (version must match package.json)
 ├── tsconfig.json
 ├── .env.example
 ├── .gitignore

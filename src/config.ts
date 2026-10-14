@@ -16,6 +16,11 @@ export interface ServerConfig {
   minRequestIntervalMs: number;
   cacheTtlMs: number;
   userAgent: string;
+  /**
+   * Optional https URL of the server/tool icon on hemmiles.com
+   * (HEMMILES_ICON_URL). Unset = no icons are advertised.
+   */
+  iconUrl?: string;
 }
 
 function intEnv(name: string, fallback: number, min: number, max: number): number {
@@ -31,11 +36,25 @@ function localeEnv(name: string, fallback: Locale): Locale {
   return (LOCALES as readonly string[]).includes(raw) ? (raw as Locale) : fallback;
 }
 
+/** Accept only an https URL on hemmiles.com / www.hemmiles.com. */
+function iconUrlEnv(name: string): string | undefined {
+  const raw = (process.env[name] ?? "").trim();
+  if (raw === "") return undefined;
+  try {
+    const u = new URL(raw);
+    if (u.protocol !== "https:") return undefined;
+    if (!["hemmiles.com", "www.hemmiles.com"].includes(u.hostname.toLowerCase())) return undefined;
+    return u.toString();
+  } catch {
+    return undefined;
+  }
+}
+
 export function loadConfig(): ServerConfig {
   const transport = (process.env.HEMMILES_TRANSPORT ?? "stdio").trim().toLowerCase();
   return {
     transport: transport === "http" ? "http" : "stdio",
-    port: intEnv("PORT", 3000, 1, 65535),
+    port: intEnv("PORT", 3001, 1, 65535),
     host: (process.env.HOST ?? "").trim() || undefined,
     defaultLocale: localeEnv("HEMMILES_DEFAULT_LOCALE", "in"),
     timeoutMs: intEnv("HEMMILES_TIMEOUT_MS", 20000, 1000, 60000),
@@ -44,6 +63,7 @@ export function loadConfig(): ServerConfig {
     cacheTtlMs: intEnv("HEMMILES_CACHE_TTL_SECONDS", 300, 0, 86400) * 1000,
     userAgent:
       (process.env.HEMMILES_USER_AGENT ?? "").trim() ||
-      "hemmiles-mcp-server/1.0 (+https://github.com/your-org/hemmiles-mcp-server)",
+      "hemmiles-mcp-server/1.0 (+https://github.com/MeruLocal/hemmileswebsite_MCP)",
+    iconUrl: iconUrlEnv("HEMMILES_ICON_URL"),
   };
 }

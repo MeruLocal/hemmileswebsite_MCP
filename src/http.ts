@@ -87,7 +87,7 @@ export function createHttpApp(ctx: ToolContext, options: HttpAppOptions = {}): S
         return;
       }
       if (path === "/.well-known/mcp.json") {
-        sendJson(res, 200, discoveryDoc(locale), PUBLIC_CORS);
+        sendJson(res, 200, discoveryDoc(locale, ctx.config.iconUrl), PUBLIC_CORS);
         return;
       }
     }

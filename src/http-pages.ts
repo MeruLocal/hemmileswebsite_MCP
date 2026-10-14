@@ -2,65 +2,74 @@
  * Human-facing HTTP pages/endpoints for the HTTP transport: a landing page at
  * `/`, a `/version` status doc, and a `/.well-known/mcp.json` discovery doc.
  * These are informational only — all MCP traffic goes to POST /mcp.
+ *
+ * Tool counts come from the registered tools (toolCatalog), and the protocol
+ * version from the SDK, so nothing here is a second hand-maintained copy.
  */
 
-import { SERVER_NAME, SERVER_VERSION, BASE_ORIGIN, type Locale } from "./constants.js";
+import { LATEST_PROTOCOL_VERSION } from "@modelcontextprotocol/sdk/types.js";
+import {
+  SERVER_NAME,
+  SERVER_VERSION,
+  BASE_ORIGIN,
+  MCP_ENDPOINT,
+  WEBSITE_URL,
+  type Locale,
+} from "./constants.js";
+import { toolCatalog } from "./tools/index.js";
 
-const MCP_PROTOCOL_VERSION = "2025-06-18";
-
-const TOOLS: ReadonlyArray<{ name: string; summary: string }> = [
-  { name: "hemmiles_list_pages", summary: "List site pages by section (from the sitemap)." },
-  { name: "hemmiles_get_page", summary: "Full normalized content of one page." },
-  { name: "hemmiles_search_site", summary: "Keyword search across pages, ranked, with snippets." },
-  { name: "hemmiles_list_features", summary: "Product capabilities (SoftwareApplication.featureList)." },
-  { name: "hemmiles_get_pricing", summary: "Subscription plans for a market (locale-specific)." },
-  { name: "hemmiles_list_resources", summary: "Guides, blog posts, docs/help hubs." },
-  { name: "hemmiles_get_faqs", summary: "FAQ Q&A from a page's FAQPage JSON-LD." },
-  { name: "hemmiles_get_company_info", summary: "Organization & contact details." },
-  { name: "hemmiles_get_policies", summary: "Security / privacy / terms pages that exist." },
-  { name: "hemmiles_get_contact_options", summary: "Official demo / contact / sales links." },
-];
+export const SERVER_DESCRIPTION =
+  "The official MCP server for Hemmiles: read-only access to public hemmiles.com content " +
+  "(pricing, features, resources, FAQs, company and contact info).";
 
 export function versionInfo(locale: Locale): Record<string, unknown> {
   return {
     name: SERVER_NAME,
     version: SERVER_VERSION,
-    protocolVersion: MCP_PROTOCOL_VERSION,
+    protocolVersion: LATEST_PROTOCOL_VERSION,
     transport: "streamable-http",
-    endpoint: "/mcp",
+    endpoint: MCP_ENDPOINT,
+    mcp_endpoint: MCP_ENDPOINT,
+    tools: toolCatalog().length,
     defaultLocale: locale,
     source: BASE_ORIGIN,
+    websiteUrl: WEBSITE_URL,
     auth: "none",
   };
 }
 
-export function discoveryDoc(locale: Locale): Record<string, unknown> {
-  return {
+export function discoveryDoc(locale: Locale, iconUrl?: string): Record<string, unknown> {
+  const doc: Record<string, unknown> = {
     name: SERVER_NAME,
     version: SERVER_VERSION,
-    description:
-      "Read-only Hemmiles website mirror (pricing, features, resources, FAQs, company info) over MCP.",
-    protocolVersion: MCP_PROTOCOL_VERSION,
-    transport: { type: "streamable-http", endpoint: "/mcp", enableJsonResponse: true },
+    description: SERVER_DESCRIPTION,
+    protocolVersion: LATEST_PROTOCOL_VERSION,
+    transport: { type: "streamable-http", endpoint: MCP_ENDPOINT, enableJsonResponse: true },
+    mcp_endpoint: MCP_ENDPOINT,
     authentication: "none",
     defaultLocale: locale,
     source: BASE_ORIGIN,
-    tools: TOOLS.map((t) => t.name),
+    websiteUrl: WEBSITE_URL,
+    // A count, not names: tools/list is the single source of tool names.
+    tools: toolCatalog().length,
   };
+  if (iconUrl) doc.icon = iconUrl;
+  return doc;
 }
 
 function esc(s: string): string {
   return s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]!));
 }
 
-export function landingPageHtml(locale: Locale): string {
+export function landingPageHtml(_locale: Locale): string {
+  const toolCount = toolCatalog().length;
   return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>${esc(SERVER_NAME)}</title>
-<meta name="description" content="Read-only MCP server mirroring the public Hemmiles field-visit website." />
+<title>Hemmiles MCP Server</title>
+<meta name="description" content="${esc(SERVER_DESCRIPTION)}" />
 <style>
   :root{
     --bg:#ffffff; --fg:#111418; --muted:#444b54; --faint:#6b727b;
@@ -93,32 +102,28 @@ export function landingPageHtml(locale: Locale): string {
 </head>
 <body>
   <main class="wrap">
-    <h1>Hemmiles Website MCP Server</h1>
+    <h1>Hemmiles MCP Server</h1>
 
-    <p>Read-only Hemmiles website mirror (product knowledge: pricing, features, resources, FAQs,
-    company &amp; contact info) from <a href="${esc(BASE_ORIGIN)}" rel="noopener noreferrer" target="_blank">hemmiles.com</a>.
-    Connect via the Streamable HTTP endpoint at <code>/mcp</code>. No API key is required —
-    this server holds no customer data and performs no account, cart, or checkout actions.</p>
+    <p>The official MCP server for Hemmiles. It gives AI assistants read-only access to public
+    content from <a href="${esc(BASE_ORIGIN)}" rel="noopener noreferrer" target="_blank">hemmiles.com</a>:
+    pricing, features, resources, FAQs, and company &amp; contact info. Connect via the Streamable
+    HTTP endpoint at <code>${MCP_ENDPOINT}</code>. No API key is required.</p>
 
     <p class="status">Status: <a href="/version">/version</a> ·
+    Health: <a href="/health">/health</a> ·
     Discovery: <a href="/.well-known/mcp.json">/.well-known/mcp.json</a> ·
-    Tools: <code>POST /mcp</code> → <code>tools/list</code></p>
+    Tools: <code>POST ${MCP_ENDPOINT}</code> → <code>tools/list</code></p>
+
+    <p>Hemmiles is field-visit / field-sales SaaS with no online store, so there is no product
+    catalog, cart, checkout, or reviews. All ${toolCount} tools are public and read-only: there are no
+    content-management, write, or transactional tools, and none require an authenticated session.
+    The server respects <code>robots.txt</code> and never requests <code>/api/</code> or submits forms.</p>
 
     <p class="note">This is not a customer CRM or commerce API. It holds no customer data, performs no
     transactions, and needs no API key — never send one here.</p>
 
-    <p>Read-only Hemmiles website mirror (product knowledge: pricing, features, resources, FAQs,
-    company &amp; contact info). No API key is required, and the public endpoint returns no personal data.
-    Hemmiles is field-visit / field-sales SaaS with no online store, so there is no product catalog,
-    cart, checkout, or reviews — those actions are not implemented.</p>
-
-    <p>All ${TOOLS.length} tools are public and read-only. There are no content-management, write, or
-    transactional tools, and none require an authenticated session. The server respects
-    <code>robots.txt</code> and never requests <code>/api/</code> or submits forms.</p>
-
-    <p class="status">Status: <a href="/version">/version</a> · Health: <a href="/health">/health</a></p>
-
-    <footer>${esc(SERVER_NAME)} v${esc(SERVER_VERSION)} · unofficial, not affiliated with Hemmiles.</footer>
+    <footer>${esc(SERVER_NAME)} v${esc(SERVER_VERSION)} · the official MCP server for
+    <a href="${esc(WEBSITE_URL)}" rel="noopener noreferrer" target="_blank">Hemmiles</a>.</footer>
   </main>
 </body>
 </html>`;
