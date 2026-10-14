@@ -105,7 +105,8 @@ test("a body of 1 MB + 10 bytes is rejected with 413", async () => {
 });
 
 test("an oversized chunked body without Content-Length is rejected with 413", async () => {
-  const app = createHttpApp(stubContext(), { security: security() });
+  const hits: string[] = [];
+  const app = createHttpApp(stubContext(), { security: security(), onBodyTooLarge: (via) => hits.push(via) });
   const port = await listen(app);
   try {
     const r = await send(port, {
@@ -114,6 +115,8 @@ test("an oversized chunked body without Content-Length is rejected with 413", as
     }).catch((e: Error) => ({ status: -1, headers: {}, body: e.message }));
     // Either a clean 413, or the socket was closed after the 413 was sent.
     assert.ok(r.status === 413 || r.status === -1, `status ${r.status}`);
+    // Server-side proof the streaming cap (not a Content-Length check) fired.
+    assert.deepEqual(hits, ["stream"]);
   } finally {
     await close(app);
   }
@@ -146,6 +149,33 @@ test("public GET docs send Access-Control-Allow-Origin: *", async () => {
       assert.equal(r.status, 200, path);
       assert.equal(r.headers["access-control-allow-origin"], "*", path);
     }
+  } finally {
+    await close(app);
+  }
+});
+
+test("an empty POST body gets the same sanitized 400 / -32700 as invalid JSON", async () => {
+  const app = createHttpApp(stubContext(), { security: security() });
+  const port = await listen(app);
+  try {
+    const empty = await send(port, { body: "" });
+    const bad = await send(port, { body: "{nope" });
+    assert.equal(empty.status, 400);
+    assert.equal(JSON.parse(empty.body).error.code, -32700);
+    assert.equal(empty.body, bad.body);
+  } finally {
+    await close(app);
+  }
+});
+
+test("only /mcp and /mcp/ are routed; /mcpfoo is 404", async () => {
+  const app = createHttpApp(stubContext(), { security: security() });
+  const port = await listen(app);
+  try {
+    assert.equal((await send(port, { path: "/mcpfoo", body: callTool(1, "hemmiles_list_pages") })).status, 404);
+    assert.equal((await send(port, { path: "/mcp/", body: callTool(2, "hemmiles_list_pages") })).status, 200);
+    const health = await send(port, { method: "GET", path: "/health" });
+    assert.ok(Array.isArray(JSON.parse(health.body).hostCheck.allowedHosts));
   } finally {
     await close(app);
   }

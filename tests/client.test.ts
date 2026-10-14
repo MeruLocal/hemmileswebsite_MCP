@@ -205,3 +205,18 @@ test("hemmiles_get_policies: a second call within the TTL does not re-fetch miss
     60_000,
   );
 });
+
+test("accepts application/*+xml and text/plain content types", async () => {
+  for (const type of ["application/atom+xml", "text/plain"]) {
+    await withLocalServer(
+      (_req, res) => {
+        res.writeHead(200, { "Content-Type": type });
+        res.end("<urlset></urlset>");
+      },
+      async (c) => {
+        assert.equal((await c.fetchHtml("https://hemmiles.com/sitemap.xml")).html, "<urlset></urlset>");
+      },
+      0,
+    );
+  }
+});

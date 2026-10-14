@@ -195,10 +195,10 @@ All environment variables are **optional** (no secrets required). See `.env.exam
 | `HEMMILES_USER_AGENT` | `hemmiles-mcp-server/1.0 …` | Outbound User‑Agent |
 | `HEMMILES_ICON_URL` | *(unset)* | https URL of an icon on `hemmiles.com`, advertised in `serverInfo`, every tool and `/.well-known/mcp.json`. Unset = no icons. |
 | `HOST` | *(unset: all interfaces)* | HTTP listen address, e.g. `127.0.0.1` |
-| `MCP_ALLOWED_HOSTS` | `localhost,127.0.0.1,[::1],::1,mcp.hemmiles.com` | HTTP: `Host` header allowlist (hostname only, port ignored). Other hosts get **403**. |
+| `MCP_ALLOWED_HOSTS` | `localhost,127.0.0.1,[::1],::1,mcp.hemmiles.com` | HTTP: `Host` header allowlist (hostname only, port ignored). Other hosts get **403** on `/mcp` while `/health` stays green, so **set this in Docker/proxy deploys** if the proxy forwards an IP or container name as `Host` (or send `Host` through with `ProxyPreserveHost On`). `/health` reports the active list under `hostCheck`. |
 | `MCP_ALLOWED_ORIGINS` | `https://mcp.hemmiles.com` | HTTP: browser `Origin` allowlist. Loopback origins on any port are always allowed; requests without `Origin` (agents, curl) are allowed. |
 | `MCP_RATE_LIMIT_PER_MINUTE` | `60` | HTTP: `POST /mcp` requests per client IP per minute (**429** + `Retry-After` above it). `0` = off. |
-| `TRUST_PROXY` | *(unset)* | HTTP: `1` = take the client IP from the right‑most `X-Forwarded-For` hop. Leave unset unless the proxy in front sets it to the real client IP. |
+| `TRUST_PROXY` | `0` | HTTP: number of trusted proxy hops in front of the server (`0` = use the socket address; legacy `true`/`1` = 1). The client IP is the `X-Forwarded-For` entry that many places from the right; a shorter header falls back to the socket. `CF-Connecting-IP` is not trusted. Behind Cloudflare then Apache use `TRUST_PROXY=2`, or configure Apache `mod_remoteip` with Cloudflare's ranges and use `1`. |
 
 ## Example conversations
 

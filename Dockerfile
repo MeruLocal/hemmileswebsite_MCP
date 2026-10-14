@@ -57,8 +57,10 @@ ENV HEMMILES_TRANSPORT=http
 ENV PORT=3001
 ENV HEMMILES_DEFAULT_LOCALE=in
 # Bind on every interface (read by the server as the listen address).
-# The /mcp Host allowlist defaults to loopback + mcp.hemmiles.com; set
-# MCP_ALLOWED_HOSTS if the proxy forwards a different Host header.
+# IMPORTANT: the /mcp Host allowlist defaults to loopback + mcp.hemmiles.com.
+# If the proxy forwards an IP or container name as Host, /mcp returns 403 while
+# /health stays green. Set MCP_ALLOWED_HOSTS (comma-separated hostnames) at run
+# time; /health shows the active list under "hostCheck".
 ENV HOST=0.0.0.0
 
 # Run as an unprivileged user.
