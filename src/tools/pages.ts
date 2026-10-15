@@ -9,14 +9,19 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import {
   localeSchema,
   responseFormatSchema,
-  ResponseFormat,
+  limitSchema,
+  offsetSchema,
   pageSummarySchema,
   normalizedPageSchema,
 } from "../schemas/product.js";
+import { withUtm } from "../utils/utm.js";
 import { buildUrl, normalizeToPath } from "../utils/validation.js";
 import { normalizePage } from "../services/product-normalizer.js";
 import {
   READ_ONLY_ANNOTATIONS,
+  pageLine,
+  pageMeta,
+  paginate,
   resolveLocale,
   runTool,
   success,
@@ -31,6 +36,8 @@ const ListPagesInput = {
     .optional()
     .describe("Filter to one section, e.g. 'features', 'teams', 'guides', 'blog', 'pricing'."),
   locale: localeSchema.optional(),
+  limit: limitSchema,
+  offset: offsetSchema,
   response_format: responseFormatSchema,
 };
 
@@ -60,9 +67,10 @@ Hemmiles is field-visit / field-sales SaaS (not an online store), so this return
 Args:
   - section (string, optional): restrict to one section (e.g. 'features').
   - locale ('global'|'in'|'us'|'gb'|'ca'|'au'|'nz'|'ie'|'sg'|'ae'|'za', optional): which market's URLs to return; defaults to the server's locale.
+  - limit (1–50, default 20), offset (default 0): pagination. Follow next_offset while has_more is true.
   - response_format ('markdown'|'json'): output format (default markdown).
 
-Returns JSON: { total, count, sections: string[], pages: [{ url, path, section, locale }] }.
+Returns JSON: { total, count, offset, has_more, next_offset?, sections: string[], pages: [{ url, path, section, locale }] }. \`sections\` always lists every section, not only those on this page.
 
 Examples:
   - "What pages does Hemmiles have?" -> no args.
@@ -71,6 +79,9 @@ Examples:
       outputSchema: {
         total: z.number(),
         count: z.number(),
+        offset: z.number(),
+        has_more: z.boolean(),
+        next_offset: z.number().optional(),
         sections: z.array(z.string()),
         pages: z.array(pageSummarySchema),
       },
@@ -84,7 +95,7 @@ Examples:
           ? canonical.filter((p) => p.section === args.section!.toLowerCase())
           : canonical;
 
-        const pages = filtered
+        const all = filtered
           .map((p) => ({
             url: buildUrl(p.path, locale),
             path: p.path === "" ? "/" : `/${p.path}`,
@@ -93,12 +104,15 @@ Examples:
           }))
           .sort((a, b) => a.path.localeCompare(b.path));
 
+        const page = paginate(all, args.offset, args.limit);
+        const pages = page.rows.map((p) => ({ ...p, url: withUtm(p.url, "hemmiles_list_pages") }));
         const sections = [...new Set(canonical.map((p) => p.section))].sort();
-        const structured = { total: pages.length, count: pages.length, sections, pages };
+        const structured = { ...pageMeta(page), sections, pages };
 
         const md = [
           `# Hemmiles pages (${locale})`,
           args.section ? `Section: **${args.section}**` : `Sections: ${sections.join(", ")}`,
+          pageLine(page),
           "",
           ...pages.map((p) => `- **${p.section}** — [${p.path}](${p.url})`),
         ].join("\n");
@@ -145,7 +159,9 @@ Error handling:
         }
 
         const res = await ctx.client.fetchHtml(url);
-        const page = normalizePage(res.html, res.url);
+        const normalized = normalizePage(res.html, res.url);
+        // Tag the page's own URL (a link a user may open); in-page links[] stay as-is.
+        const page = { ...normalized, url: withUtm(normalized.url, "hemmiles_get_page") };
         const structured = page as unknown as Record<string, unknown>;
 
         const md = [

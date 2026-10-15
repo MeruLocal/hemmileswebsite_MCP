@@ -3,6 +3,7 @@
  *   - hemmiles_get_company_info   (brief: get_store_information)
  *   - hemmiles_get_policies       (brief: get_return_policy / get_shipping_information)
  *   - hemmiles_get_contact_options (safe alternative to cart/checkout actions)
+ *   - hemmiles_get_started        (one-call next step: demo / contact / pricing)
  *
  * These are the closest honest equivalents of the brief's store/shopping
  * tools. Hemmiles is SaaS, so there is no shipping or returns policy and no
@@ -13,13 +14,14 @@
 
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { POLICY_CANDIDATE_PATHS } from "../constants.js";
+import { POLICY_CANDIDATE_PATHS, type Locale } from "../constants.js";
 import {
   localeSchema,
   responseFormatSchema,
   companyInfoSchema,
 } from "../schemas/product.js";
 import { buildUrl } from "../utils/validation.js";
+import { withUtm, withUtmOpt } from "../utils/utm.js";
 import { HemmilesError } from "../utils/errors.js";
 import { normalizeCompany, normalizePage } from "../services/product-normalizer.js";
 import {
@@ -29,6 +31,41 @@ import {
   success,
   type ToolContext,
 } from "./helpers.js";
+
+interface ContactOptions {
+  demoUrl: string;
+  contactUrl: string;
+  pricingUrl: string;
+  salesContactUrl?: string;
+  email?: string;
+}
+
+/**
+ * Shared by hemmiles_get_contact_options and hemmiles_get_started: official
+ * demo/contact/pricing links (UTM-tagged with the calling tool's name), plus
+ * the Organization email and sales contact point when the home page has them.
+ */
+async function buildContactOptions(ctx: ToolContext, locale: Locale, toolName: string): Promise<ContactOptions> {
+  let email: string | undefined;
+  let salesContactUrl: string | undefined;
+  try {
+    const res = await ctx.client.fetchHtml(buildUrl("", locale));
+    const company = normalizeCompany(res.html);
+    email = company.email;
+    const sales = company.contactPoints?.find((c) => (c.contactType ?? "").toLowerCase().includes("sales"));
+    salesContactUrl = sales?.url;
+  } catch {
+    // The page links below are still valid without the org data.
+  }
+  const out: ContactOptions = {
+    demoUrl: withUtm(buildUrl("demo", locale), toolName),
+    contactUrl: withUtm(buildUrl("contact", locale), toolName),
+    pricingUrl: withUtm(buildUrl("pricing", locale), toolName),
+  };
+  if (salesContactUrl !== undefined) out.salesContactUrl = withUtm(salesContactUrl, toolName);
+  if (email !== undefined) out.email = email;
+  return out;
+}
 
 export function registerStoreTools(server: McpServer, ctx: ToolContext): void {
   // -------------------------------------------------------------------------
@@ -54,7 +91,16 @@ Example: "How do I contact Hemmiles?" / "Who makes Hemmiles?".`,
         const locale = resolveLocale(ctx, args.locale);
         // Organization JSON-LD is present site-wide; the home page is reliable.
         const res = await ctx.client.fetchHtml(buildUrl("", locale));
-        const company = normalizeCompany(res.html);
+        const raw = normalizeCompany(res.html);
+        const company = {
+          ...raw,
+          url: withUtmOpt(raw.url, "hemmiles_get_company_info"),
+          contactPoints: raw.contactPoints?.map((c) =>
+            c.url !== undefined ? { ...c, url: withUtm(c.url, "hemmiles_get_company_info") } : c,
+          ),
+        };
+        if (company.url === undefined) delete company.url;
+        if (company.contactPoints === undefined) delete company.contactPoints;
         const structured = company as unknown as Record<string, unknown>;
 
         const md = [
@@ -131,7 +177,7 @@ Returns JSON: { note, found: [{ topic, url, title, description, excerpt }], unav
               const page = normalizePage(res.html, res.url);
               const entry: { topic: string; url: string; title?: string; description?: string; excerpt?: string } = {
                 topic,
-                url: res.url,
+                url: withUtm(res.url, "hemmiles_get_policies"),
               };
               if (page.title !== undefined) entry.title = page.title;
               if (page.description !== undefined) entry.description = page.description;
@@ -200,27 +246,13 @@ Returns JSON: { email?, demoUrl, contactUrl, pricingUrl, salesContactUrl?, note 
     async (args) =>
       runTool(async () => {
         const locale = resolveLocale(ctx, args.locale);
-        let email: string | undefined;
-        let salesContactUrl: string | undefined;
-        try {
-          const res = await ctx.client.fetchHtml(buildUrl("", locale));
-          const company = normalizeCompany(res.html);
-          email = company.email;
-          const sales = company.contactPoints?.find((c) => (c.contactType ?? "").toLowerCase().includes("sales"));
-          salesContactUrl = sales?.url;
-        } catch {
-          // Contact links below are still valid without the org data.
-        }
-
+        const opts = await buildContactOptions(ctx, locale, "hemmiles_get_contact_options");
+        const { email, salesContactUrl } = opts;
         const structured: Record<string, unknown> = {
-          demoUrl: buildUrl("demo", locale),
-          contactUrl: buildUrl("contact", locale),
-          pricingUrl: buildUrl("pricing", locale),
+          ...opts,
           note:
             "Hemmiles is sales-/demo-led SaaS with no online checkout. Use these official links to book a demo or contact the team. This server performs no transactions and submits no forms on your behalf.",
         };
-        if (email !== undefined) structured.email = email;
-        if (salesContactUrl !== undefined) structured.salesContactUrl = salesContactUrl;
 
         const md = [
           `# Contact & demo — Hemmiles (${locale})`,
@@ -234,6 +266,65 @@ Returns JSON: { email?, demoUrl, contactUrl, pricingUrl, salesContactUrl?, note 
           salesContactUrl ? `- **Sales:** ${salesContactUrl}` : "",
         ]
           .filter((l) => l !== "")
+          .join("\n");
+
+        return success(structured, md, args.response_format);
+      }),
+  );
+
+  // -------------------------------------------------------------------------
+  server.registerTool(
+    "hemmiles_get_started",
+    {
+      title: "Get started with Hemmiles",
+      description: `Return the next step for someone who wants to try or buy Hemmiles, in one call: the book-a-demo page, the contact page, the pricing page, and the sales contact and email when published, plus a one-line call to action.
+
+Use this when a user asks how to start, try, buy or sign up for Hemmiles. Hemmiles is sales-/demo-led: no self-serve signup URL is published, so signupUrl is null and the demo and contact pages are the way in. Links carry utm_source=mcp attribution. This tool only returns official links; it never submits a form or starts a trial.
+
+Args:
+  - locale (optional): market prefix for the page links (default: server locale).
+  - response_format ('markdown'|'json').
+
+Returns JSON: { demoUrl, contactUrl, pricingUrl, salesContactUrl?, email?, signupUrl: null, note, callToAction }.`,
+      inputSchema: { locale: localeSchema.optional(), response_format: responseFormatSchema },
+      outputSchema: {
+        demoUrl: z.string(),
+        contactUrl: z.string(),
+        pricingUrl: z.string(),
+        salesContactUrl: z.string().optional(),
+        email: z.string().optional(),
+        signupUrl: z.string().nullable(),
+        note: z.string(),
+        callToAction: z.string(),
+      },
+      annotations: READ_ONLY_ANNOTATIONS,
+    },
+    async (args) =>
+      runTool(async () => {
+        const locale = resolveLocale(ctx, args.locale);
+        const opts = await buildContactOptions(ctx, locale, "hemmiles_get_started");
+        const structured: Record<string, unknown> = {
+          ...opts,
+          signupUrl: null,
+          note: "Hemmiles does not publish a self-serve signup URL, so the next step is the demo or contact page.",
+          callToAction:
+            "Book a demo to see Hemmiles with your team's routes, or compare plans on the pricing page.",
+        };
+
+        const md = [
+          `# Get started with Hemmiles (${locale})`,
+          "",
+          structured.callToAction as string,
+          "",
+          `- **Book a demo:** ${opts.demoUrl}`,
+          `- **Contact:** ${opts.contactUrl}`,
+          `- **Pricing:** ${opts.pricingUrl}`,
+          opts.salesContactUrl ? `- **Sales:** ${opts.salesContactUrl}` : "",
+          opts.email ? `- **Email:** ${opts.email}` : "",
+          "",
+          `_${structured.note as string}_`,
+        ]
+          .filter((l, i, arr) => l !== "" || (arr[i - 1] ?? "") !== "")
           .join("\n");
 
         return success(structured, md, args.response_format);

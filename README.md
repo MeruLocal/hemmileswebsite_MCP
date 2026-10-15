@@ -61,16 +61,19 @@ All tools are read‑only (`readOnlyHint: true`) and support `response_format: "
 
 | Tool | Purpose |
 |---|---|
-| `hemmiles_list_pages` | Enumerate site pages by section (from the live sitemap). |
+| `hemmiles_list_pages` | Enumerate site pages by section (from the live sitemap), paginated (`limit` 1–50, default 20; `offset`). |
 | `hemmiles_get_page` | Full normalized content of one page: title, description, headings, breadcrumbs, links, JSON‑LD types, body text. |
 | `hemmiles_search_site` | Keyword search across pages (slug + deep full‑text), ranked, with snippets & pagination. Deep search fetches at most `max_pages` uncached pages (default 8, max 24); cached pages are scored for free. |
 | `hemmiles_list_features` | The product's capabilities from `SoftwareApplication.featureList`, linked to feature pages. |
 | `hemmiles_get_pricing` | Subscription plans for a market: price, currency, unit, user limits, monthly/annual billing. |
-| `hemmiles_list_resources` | Guides, blog posts, docs/help hubs. |
+| `hemmiles_list_resources` | Guides, blog posts, docs/help hubs, paginated (`limit` 1–50, default 20; `offset`). |
 | `hemmiles_get_faqs` | FAQ Q&A from a page's `FAQPage` JSON‑LD (pricing page has a detailed set). |
 | `hemmiles_get_company_info` | Organization data: name, site, logo, support email, contact points. |
 | `hemmiles_get_policies` | Security / privacy / terms / legal / cookies pages that actually exist. |
 | `hemmiles_get_contact_options` | Official demo / contact / sales links + support email (the safe alternative to cart/checkout). |
+| `hemmiles_get_started` | One-call next step for "how do I try / buy Hemmiles?": demo, contact and pricing links plus a call to action. `signupUrl` is `null` (no self-serve signup page is published). |
+
+Own-site URLs that tools return for a user to open (page URLs, demo/contact/pricing links, company URL) carry `utm_source=mcp&utm_medium=ai_agent&utm_campaign=<tool name>`, so visits from AI assistants show up in hemmiles.com analytics. URLs used for fetching, `path` fields, in-page `links[]`, external profiles and `mailto:` links are never tagged. Prices are never changed.
 
 ## Tool mapping
 
@@ -193,6 +196,7 @@ All environment variables are **optional** (no secrets required). See `.env.exam
 | `HEMMILES_MIN_REQUEST_INTERVAL_MS` | `600` | Minimum spacing between requests |
 | `HEMMILES_CACHE_TTL_SECONDS` | `300` | In‑memory cache TTL (0 disables) |
 | `HEMMILES_USER_AGENT` | `hemmiles-mcp-server/1.0 …` | Outbound User‑Agent |
+| `HEMMILES_USAGE_LOG` | `1` | `0` turns off the per‑call usage line on stderr (see [Testing](#testing) → Usage records) |
 | `HEMMILES_ICON_URL` | *(unset)* | https URL of an icon on `hemmiles.com`, advertised in `serverInfo`, every tool and `/.well-known/mcp.json`. Unset = no icons. |
 | `HOST` | *(unset: all interfaces)* | HTTP listen address, e.g. `127.0.0.1` |
 | `MCP_ALLOWED_HOSTS` | `localhost,127.0.0.1,[::1],::1,mcp.hemmiles.com` | HTTP: `Host` header allowlist (hostname only, port ignored). Other hosts get **403** on `/mcp` while `/health` stays green, so **set this in Docker/proxy deploys** if the proxy forwards an IP or container name as `Host` (or send `Host` through with `ProxyPreserveHost On`). `/health` reports the active list under `hostCheck`. |
@@ -257,9 +261,21 @@ MCP `tools/call` request and the resulting `structuredContent` (abridged; **valu
 npm test        # unit tests (no network): validation, SSRF, normalizer, formatting
 npm run typecheck
 npm run check:versions   # package.json version == server.json version
+npm run check:docs       # README: no hard-coded prices, no personal paths
 ```
 
+CI (`.github/workflows/ci.yml`) runs `npm ci`, `npm audit --omit=dev --audit-level=high`, typecheck, build, tests and both checks on every pull request and on pushes to `main`.
+
 The unit tests use HTML fixtures whose **structure** mirrors the live site (JSON‑LD with numeric prices, array `priceSpecification`, `FAQPage`, `Organization`) but with test values. SSRF/robots rejections are asserted to happen **before** any network call.
+
+### Usage records
+
+Every tool call writes one JSON line to **stderr**: `{"event":"tool_call","ts":…,"tool":…,"client":…,"ms":…,"ok":…,"errorCode"?:…}`. `client` is the MCP `clientInfo.name`, or on stateless HTTP the first product token of the `User-Agent`. Tool arguments, queries, paths, URLs and IP addresses are never recorded. Set `HEMMILES_USAGE_LOG=0` to turn it off.
+
+```bash
+# e.g. count calls per tool from the container log
+docker logs <container> 2>&1 | grep '"event":"tool_call"' | jq -r .tool | sort | uniq -c
+```
 
 ## Security & compliance
 
