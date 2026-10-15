@@ -196,6 +196,7 @@ All environment variables are **optional** (no secrets required). See `.env.exam
 | `HEMMILES_MIN_REQUEST_INTERVAL_MS` | `600` | Minimum spacing between requests |
 | `HEMMILES_CACHE_TTL_SECONDS` | `300` | In‑memory cache TTL (0 disables) |
 | `HEMMILES_USER_AGENT` | `hemmiles-mcp-server/1.0 …` | Outbound User‑Agent |
+| `HEMMILES_USAGE_LOG` | `1` | `0` turns off the per‑call usage line on stderr (see [Testing](#testing) → Usage records) |
 | `HEMMILES_ICON_URL` | *(unset)* | https URL of an icon on `hemmiles.com`, advertised in `serverInfo`, every tool and `/.well-known/mcp.json`. Unset = no icons. |
 | `HOST` | *(unset: all interfaces)* | HTTP listen address, e.g. `127.0.0.1` |
 | `MCP_ALLOWED_HOSTS` | `localhost,127.0.0.1,[::1],::1,mcp.hemmiles.com` | HTTP: `Host` header allowlist (hostname only, port ignored). Other hosts get **403** on `/mcp` while `/health` stays green, so **set this in Docker/proxy deploys** if the proxy forwards an IP or container name as `Host` (or send `Host` through with `ProxyPreserveHost On`). `/health` reports the active list under `hostCheck`. |
@@ -260,9 +261,21 @@ MCP `tools/call` request and the resulting `structuredContent` (abridged; **valu
 npm test        # unit tests (no network): validation, SSRF, normalizer, formatting
 npm run typecheck
 npm run check:versions   # package.json version == server.json version
+npm run check:docs       # README: no hard-coded prices, no personal paths
 ```
 
+CI (`.github/workflows/ci.yml`) runs `npm ci`, `npm audit --omit=dev --audit-level=high`, typecheck, build, tests and both checks on every pull request and on pushes to `main`.
+
 The unit tests use HTML fixtures whose **structure** mirrors the live site (JSON‑LD with numeric prices, array `priceSpecification`, `FAQPage`, `Organization`) but with test values. SSRF/robots rejections are asserted to happen **before** any network call.
+
+### Usage records
+
+Every tool call writes one JSON line to **stderr**: `{"event":"tool_call","ts":…,"tool":…,"client":…,"ms":…,"ok":…,"errorCode"?:…}`. `client` is the MCP `clientInfo.name`, or on stateless HTTP the first product token of the `User-Agent`. Tool arguments, queries, paths, URLs and IP addresses are never recorded. Set `HEMMILES_USAGE_LOG=0` to turn it off.
+
+```bash
+# e.g. count calls per tool from the container log
+docker logs <container> 2>&1 | grep '"event":"tool_call"' | jq -r .tool | sort | uniq -c
+```
 
 ## Security & compliance
 

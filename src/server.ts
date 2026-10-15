@@ -17,6 +17,8 @@ import { loadConfig, type ServerConfig } from "./config.js";
 import { HemmilesClient } from "./services/hemmiles-client.js";
 import { SitemapService } from "./services/sitemap.js";
 import { registerAllTools, type ToolContext } from "./tools/index.js";
+import { ERROR_CODE } from "./tools/helpers.js";
+import { clientFromUserAgent, recordToolCall } from "./utils/usage.js";
 
 export interface BuiltServer {
   server: McpServer;
@@ -80,6 +82,53 @@ function addToolIcons(server: McpServer, icons: Icon[]): void {
   });
 }
 
+type ToolHandler = (args: unknown, extra: unknown) => Promise<Record<string | symbol, unknown>>;
+
+/** Client name: from initialize (stdio/sessions), else the HTTP User-Agent. */
+function clientName(server: McpServer, extra: unknown): string {
+  const fromInit = server.server.getClientVersion()?.name;
+  if (fromInit) return fromInit;
+  const headers = (extra as { requestInfo?: { headers?: Record<string, string | string[] | undefined> } })?.requestInfo
+    ?.headers;
+  const ua = headers?.["user-agent"];
+  return clientFromUserAgent(Array.isArray(ua) ? ua[0] : ua);
+}
+
+/**
+ * Register tools through a thin wrapper that times each call and records one
+ * usage line (tool, client, ms, ok, errorCode). Arguments are never recorded.
+ */
+function registerInstrumentedTools(server: McpServer, ctx: ToolContext): void {
+  const instrumented = {
+    registerTool(name: string, config: unknown, cb: ToolHandler) {
+      const timed: ToolHandler = async (args, extra) => {
+        const started = performance.now();
+        let ok = false;
+        let errorCode: string | undefined;
+        try {
+          const result = await cb(args, extra);
+          ok = result.isError !== true;
+          if (!ok) errorCode = (result[ERROR_CODE] as string | undefined) ?? "TOOL_ERROR";
+          return result;
+        } catch (error) {
+          errorCode = "INTERNAL";
+          throw error;
+        } finally {
+          const rec = { tool: name, client: clientName(server, extra), ms: performance.now() - started, ok };
+          recordToolCall(errorCode ? { ...rec, errorCode } : rec);
+        }
+      };
+      return (server.registerTool as unknown as (n: string, c: unknown, h: ToolHandler) => unknown).call(
+        server,
+        name,
+        config,
+        timed,
+      );
+    },
+  };
+  registerAllTools(instrumented as unknown as McpServer, ctx);
+}
+
 /** Build a new McpServer bound to a shared context. Cheap: no I/O. */
 export function createMcpServer(ctx: ToolContext): McpServer {
   const icons = iconsFor(ctx.config.iconUrl);
@@ -87,7 +136,7 @@ export function createMcpServer(ctx: ToolContext): McpServer {
     { name: SERVER_NAME, version: SERVER_VERSION, websiteUrl: WEBSITE_URL, ...(icons ? { icons } : {}) },
     { instructions: SERVER_INSTRUCTIONS },
   );
-  registerAllTools(server, ctx);
+  registerInstrumentedTools(server, ctx);
   if (icons) addToolIcons(server, icons);
   return server;
 }

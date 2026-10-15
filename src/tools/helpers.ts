@@ -9,7 +9,7 @@ import type { HemmilesClient } from "../services/hemmiles-client.js";
 import type { SitemapService } from "../services/sitemap.js";
 import { type Locale } from "../constants.js";
 import { isLocale } from "../utils/validation.js";
-import { formatError } from "../utils/errors.js";
+import { formatError, HemmilesError } from "../utils/errors.js";
 import { enforceLimit } from "../utils/format.js";
 import { ResponseFormat, type ResponseFormatValue } from "../schemas/product.js";
 
@@ -52,15 +52,26 @@ export function success(
   };
 }
 
+/**
+ * Error code of a failed tool result, for usage records. A symbol key, so it
+ * is never serialized to the client.
+ */
+export const ERROR_CODE = Symbol("hemmiles.errorCode");
+
 /** Run a tool body, converting any thrown error into an actionable result. */
 export async function runTool(fn: () => Promise<ToolResult>): Promise<ToolResult> {
   try {
     return await fn();
   } catch (error) {
-    return {
+    const result: ToolResult = {
       content: [{ type: "text", text: formatError(error) }],
       isError: true,
     };
+    Object.defineProperty(result, ERROR_CODE, {
+      value: error instanceof HemmilesError ? error.code : "INTERNAL",
+      enumerable: false,
+    });
+    return result;
   }
 }
 
