@@ -26,9 +26,13 @@ async function runStdio(): Promise<void> {
 
 async function runHttp(): Promise<void> {
   const { createServer: createHttpServer } = await import("node:http");
-  const { server, config } = createServer();
+  // Do NOT reuse the server instance across requests. The MCP SDK's McpServer
+  // maintains internal connection state and cannot be safely reconnected.
+  // Instead, we create a config once and a new server instance per request.
+  const config = (await import("./config.js")).loadConfig();
 
   const startedAt = Date.now();
+
   const httpServer = createHttpServer((req, res) => {
     void (async () => {
       const path = (req.url ?? "").split("?")[0] ?? "";
@@ -78,14 +82,25 @@ async function runHttp(): Promise<void> {
         for await (const chunk of req) chunks.push(chunk as Buffer);
         const body = chunks.length ? JSON.parse(Buffer.concat(chunks).toString("utf8")) : undefined;
 
-        // New stateless transport per request avoids request-id collisions.
+        // Create a new server instance per request. This avoids the "Already
+        // connected to a transport" error that occurs when reusing a server
+        // instance with multiple transports. The config is shared (immutable),
+        // but the server, client, and sitemap service are fresh per request.
+        const { server } = createServer(config);
+
+        // Create a new stateless transport for this request.
         const transport = new StreamableHTTPServerTransport({
           sessionIdGenerator: undefined,
           enableJsonResponse: true,
         });
+
         res.on("close", () => void transport.close());
-        await server.connect(transport);
-        await transport.handleRequest(req, res, body);
+        try {
+          await server.connect(transport);
+          await transport.handleRequest(req, res, body);
+        } finally {
+          await transport.close();
+        }
       } catch (error) {
         if (!res.headersSent) {
           res.writeHead(400, { "Content-Type": "application/json" });
