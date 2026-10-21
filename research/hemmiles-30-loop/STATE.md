@@ -2,8 +2,8 @@
 
 - Programme start: 2026-10-21
 - Branch: research/hemmiles-30-loop-2026-10-21 (repo hemmileswebsite_MCP)
-- Next loop to run: 13
-- Loops complete: 12
+- Next loop to run: 14
+- Loops complete: 13
 
 | Loop | Status | File | Notes |
 |---|---|---|---|
@@ -19,3 +19,4 @@
 | 10 | researched | loops/L10-south-africa-india-market-selection.md | ZA DEFER. India widest measured demand (12 terms 60-350/mo). Recommended execution markets: India + US (UK reserve); others deferred. Scorecard /14 is a tie-breaker (proof/legal all 0). Q26 founder confirm |
 | 11 | researched | loops/L11-claims-features-pricing.md | Claim ledger C1-C18; plan matrix confirmed ($117/$147/$495 minimums); gate gaps: route map + CRM write-back are Professional but unlabelled on feature pages; location/retention controls Enterprise-only vs security copy; exhibition plan unstated; no claim verified (no demo env) |
 | 12 | researched | loops/L12-existing-commercial-pages.md | 31 pages crawled (tags healthy: 1 H1, descriptions 135-161, OG, JSON-LD); weakness = differentiation/proof: team pages ~97% identical, shared H2 on every page, "engineers teams" grammar bug, 0 real screenshots; 10 refresh briefs; mobile not tested |
+| 13 | researched | loops/L13-existing-blogs-and-guides.md | 6 live articles ~300 words, labels 4-6 min (about 3x overstated), no links to features; 5 new guides not live; 77 CMS mileage/SOC2 posts while product pages have 0 mileage mentions -> HOLD, Q10/Q34 owner decision |
