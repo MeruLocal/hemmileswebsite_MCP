@@ -18,7 +18,7 @@ Retrieved: 2026-10-21 from each vendor's official site via a page-fetch tool tha
 | Evidence of outcomes | none; illustrative stories only | not captured | not captured | not captured | not captured | case-study % claims | % claims without method |
 
 Observations (benchmarks, not judgments of quality):
-1. Hemmiles' stated prices are the **lowest among those that publish prices** (Badger $58-69 / $95-109; Map My Customers $99+ annual-only), and its 3-seat minimum is low (Map My Customers 5 / 10 / 35).
+1. *(Scoped in Loop 26: true only among the six benchmarked vendors; aggregator listings show cheaper tools such as Outfield and The Field.)* Hemmiles' stated prices are the **lowest among those of the six that publish prices** (Badger $58-69 / $95-109; Map My Customers $99+ annual-only), and its 3-seat minimum is low (Map My Customers 5 / 10 / 35).
 2. Hemmiles **offers a trial without a card**; Repsly and SPOTIO say they do not offer a trial; Map My Customers states none.
 3. Hemmiles is **missing** what several rivals state: route optimisation, **named CRM integrations**, security certification badges, quantified outcomes and customer proof.
 4. Lystloc and BeatRoute display SOC/ISO badges; Hemmiles' pages claim none (and its security page deliberately makes no hosting claim, Loop 11). For enterprise or regulated buyers this is a trust gap.
@@ -50,7 +50,7 @@ Not recommended: Badger (route-optimisation-centred, different primary job), Rep
 
 ## 4. Decisions
 1. Competitive set for later loops: US - Badger, Map My Customers, SPOTIO, Outfield, Repmove; India - Trackolap, Trackobit, Lystloc, Spoors; scope-different - Repsly, BeatRoute.
-2. Pricing and plan structure are Hemmiles' strengths to state factually (3-seat minimum, no-card trial, lowest published price) - after verifying competitor data on the day of use.
+2. Pricing and plan structure are Hemmiles' strengths to state factually (3-seat minimum, no-card trial; do not claim "lowest price" beyond the six benchmarked vendors) - after verifying competitor data on the day of use.
 3. Trust-proof gaps (certifications, customer proof, outcomes) go to Loop 27's backlog; no competing claims of "SOC 2" or "ISO" until true.
 4. One comparison page candidate recorded; not approved.
 

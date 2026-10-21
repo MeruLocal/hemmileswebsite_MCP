@@ -2,8 +2,8 @@
 
 - Programme start: 2026-10-21
 - Branch: research/hemmiles-30-loop-2026-10-21 (repo hemmileswebsite_MCP)
-- Next loop to run: 26
-- Loops complete: 25
+- Next loop to run: 27
+- Loops complete: 26
 
 | Loop | Status | File | Notes |
 |---|---|---|---|
@@ -32,3 +32,4 @@
 | 23 | specified | loops/L23-visuals-case-studies-video.md | 8 visual briefs (V4 time-use and V8 cannot carry numbers without method/calculator); case-study protocol (real vs illustrative separated; /customers noindex until a real story); 3 video scripts need demo workspace; illustrative pharma profile has specific-sounding figures -> keep label; Phase D complete |
 | 24 | researched (blocked on data) | loops/L24-ranking-ctr-opportunities.md | No GSC/Ahrefs data; web spot-checks show no hemmiles.com results (weak evidence); opportunity = indexing/discovery first; pre-GSC checklist, exact first-pull spec, 10 low-confidence hypotheses; Q58 founder must verify GSC |
 | 25 | researched | loops/L25-internal-links.md | Crawl of 113 URLs: product and article silos disconnected (0 feature->article, 0 article->feature links); /in/product only 1 in-body inbound; 3 field posts buried on blog pages 13-14 under 77 CMS posts; every page links to 307-redirecting /privacy,/terms; CMS posts use unprefixed links; exact link plan + 5 template fixes |
+| 26 | researched (baseline 0) | loops/L26-ai-visibility.md | 0 AI citations on all platforms; no Brand Radar report for Hemmiles; buyer-question probe cites GetApp/FitGap and other vendors, not Hemmiles; 16-prompt monthly set; error register E1-E7 (llms.txt "route suggestions", CRM plan gate, mileage/SOC2 CMS posts); Loop 20 "lowest price" claim scoped (Outfield/The Field cheaper per aggregators) |
