@@ -2,8 +2,8 @@
 
 - Programme start: 2026-10-21
 - Branch: research/hemmiles-30-loop-2026-10-21 (repo hemmileswebsite_MCP)
-- Next loop to run: 20
-- Loops complete: 19
+- Next loop to run: 21
+- Loops complete: 20
 
 | Loop | Status | File | Notes |
 |---|---|---|---|
@@ -26,3 +26,4 @@
 | 17 | researched | loops/L17-exhibition-and-vertical-selection.md | Exhibition: US "lead retrieval app" 400 / "trade show lead capture app" 150 at CPC $25-30, but WhatsApp send, ROI widgets, card OCR unverified, plan unstated; 6 use cases consolidated, NO new vertical URLs approved; Phase C complete |
 | 18 | researched (spec) | loops/L18-connector-readiness-and-migration.md | Integration unproven: no named connectors; gaps G1-G9 (photos/notes not claimed to sync, no conflict rule, geocoding, retry, identity, back-fill); test matrix T1-T14 incl. offline+owner-change; migration checklist; Gate G18 for any CRM-named page |
 | 19 | researched | loops/L19-integration-demand.md | CRM-named queries are near-unmeasurable (salesforce field sales 20, route planning 0); integration = objection-removal not traffic; no "Hemmiles + CRM" pages until Gate G18; add "which CRM?" field to forms (Q48); competitor Badger has per-CRM pages and tiered integration pricing (vendor claim) |
+| 20 | researched | loops/L20-competitor-benchmarks.md | Hemmiles lowest published price, 3-seat min, no-card trial; missing route optimisation, named CRMs, certifications (BeatRoute/Lystloc show SOC/ISO badges); India SERP top 10 includes DR 2/5/10 sites; 1 comparison candidate (vs Map My Customers, gated on G18); fetch-tool summaries must be re-verified |
