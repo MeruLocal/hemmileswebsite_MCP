@@ -59,3 +59,6 @@ Metric: demo requests that mention the CRM; assisted conversions; AI-answer cita
 
 ## 8. Next
 Loop 20: competitor benchmarks - Badger Maps, Map My Customers, Repsly, SPOTIO, BeatRoute, Lystloc: current equivalent workflows, implementation, proof and costs from official sources; commercial vs search competitor maps; one comparison candidate.
+
+## Update from Loop 28 (2026-10-21)
+Q48 is answered: the live demo form already has a `crm` field (plus teamType and teamSize). No form change is needed to capture the prospect's CRM; the action is to report on that field monthly.

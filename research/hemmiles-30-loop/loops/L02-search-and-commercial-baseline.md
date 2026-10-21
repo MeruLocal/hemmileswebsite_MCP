@@ -62,3 +62,6 @@ Define once; use identically in every later loop. Counts are TBD until sources e
 
 ## 6. Next
 Loop 3: complete technical inventory - fetch live robots, sitemap index and child sitemaps, reconcile against source routes (Loop 1) and the 8 guides + 3 blogs; tag each URL's discovery source.
+
+## Update from Loop 28 (2026-10-21)
+GA4 (`G-95536GJEJ5`) and Microsoft Clarity (`yugnoc43y8`) **are present in the live HTML** and documented in the site repo (`docs/analytics.md`). The "GA4/Clarity unverified" rows above should read: tag live; property/project **access** unknown (Q6). The demo/contact forms already feed the CRM and admin panel with attribution (Loop 28).
