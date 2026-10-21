@@ -2,8 +2,8 @@
 
 - Programme start: 2026-10-21
 - Branch: research/hemmiles-30-loop-2026-10-21 (repo hemmileswebsite_MCP)
-- Next loop to run: 6
-- Loops complete: 5
+- Next loop to run: 7
+- Loops complete: 6
 
 | Loop | Status | File | Notes |
 |---|---|---|---|
@@ -12,3 +12,4 @@
 | 3 | researched (first pass) | loops/L03-technical-inventory.md | 152 sitemap URLs; 5 new guides 404 live (prod behind main); 77 off-topic mileage/tax CMS posts; bare URLs sitemapped but canonical=/in; privacy placeholders confirmed; full crawl/render still to do |
 | 4 | researched | loops/L04-country-page-audit.md | Core country pages ~99.7% identical text; Ahmedabad/Surat sample data on every market; x-default+en point to bare URL whose canonical is /in; fr/de noindex live, PR #7 would flip; Q12-Q14 gate PR #7 |
 | 5 | researched | loops/L05-united-states.md | Decision VALIDATE. US vocabulary = field sales app/software/CRM, outside sales; "field visit app" has 0 measured US volume; SERP led by AI Overview + vendor listicles + Reddit + Gartner; Ahrefs units ~1,200 |
+| 6 | researched | loops/L06-canada.md | Decision DEFER as separate market: Ahrefs CA volume 10-20/mo; /ca shows Ahmedabad coordinates; CAD shown but charge raised in USD (wording tension); Quebec needs express-consent/French check by counsel |
