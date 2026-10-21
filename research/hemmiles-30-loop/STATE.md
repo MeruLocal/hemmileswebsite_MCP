@@ -2,8 +2,8 @@
 
 - Programme start: 2026-10-21
 - Branch: research/hemmiles-30-loop-2026-10-21 (repo hemmileswebsite_MCP)
-- Next loop to run: none (programme complete)
-- Loops complete: 30
+- Next loop to run: 31
+- Loops complete: 30 (of 35 after extension)
 
 | Loop | Status | File | Notes |
 |---|---|---|---|

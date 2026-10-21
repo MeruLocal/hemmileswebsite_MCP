@@ -58,3 +58,11 @@ Privacy + Terms pages contain template wording / missing legal identity. Owner (
 - MCP sitemap service can skip failed child sitemaps / fall back to a static list that omits current pages. (Loop 1, 3)
 - UK homepage retains an Ahmedabad example; UK GPS article duplicates international copy. (Loops 4, 7)
 - Customers page profiles are labelled illustrative; keep that label. (Loops 23, 27)
+
+## Extension (founder approved 2026-10-21): loops 31-35
+Evidence-only loops that need no owner input. Same rules as above.
+31. Full crawl pass: status, redirects, canonical, robots, title, H1, hreflang for all 152 sitemap URLs plus the market-prefixed commercial pages
+32. Rendering, mobile and performance audit in a real browser (layout, tap targets, Core Web Vitals, cookie banner, forms without submitting)
+33. India competitor price and feature benchmark (Trackolap, Trackobit, Spoors, PepUpSales, Lystloc, FieldBlaze and similar) from official pages
+34. Privacy and Terms full read-through: every statement, gap and inconsistency against the claim ledger (no legal drafting)
+35. Contradiction audit: every public page checked against the claim ledger; final consolidated update of the backlog and handoff
