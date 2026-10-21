@@ -122,3 +122,6 @@ Loop 30: consolidated handoff - resolve conflicts, select the first release coho
 
 ## Addendum from Loop 34 (2026-10-21)
 O02 (legal pages) now includes the inconsistency list I1-I9 and the 11-item owner/counsel fact checklist in `L34-privacy-terms-read-through.md` section 5-6: route-suggestion wording, "not used for advertising" vs click-ID capture, banner naming only Google Analytics, undisclosed Cloudflare analytics, Enterprise-only location controls, "one legal entity" with none named, Terms silent on trial/minimum seats/renewal, and the internal "template content" notice shown publicly. D12 also covers the consent banner text.
+
+## Final backlog note (Loop 35, 2026-10-21)
+Total tickets: **61** (60 from Loop 29 + O16 from Loop 33). Loops 31-35 changed scope of existing tickets rather than adding new IDs: D03 (sitemap redirects, hreflang targets, `/in/partners` canonical loop, 270 non-India market pages), D05 (plan names missing on every non-pricing page; mobile pricing table), D01 (reports mockup "Orders placed 36%"), D07/D09 (absolute phrases, `llms.txt` FAQ count and positioning), D12/D15 (consent banner text, touch targets, form required markers), O02 (Loop 34 inconsistencies I1-I9 and counsel checklist), O06 (escalated: regulatory-compliance posts - DOT hours of service, FLSA, California AB5 - plus IRS and SOC 2 posts).

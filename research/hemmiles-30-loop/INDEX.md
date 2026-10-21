@@ -1,6 +1,6 @@
 # Hemmiles 30-loop research programme - index
 
-Started and completed 2026-10-21. Rolling draft PR: https://github.com/MeruLocal/hemmileswebsite_MCP/pull/22. Programme rules: `PROGRAM.md`. Live state: `STATE.md`. Start with `loops/L30-consolidated-handoff.md`, then the backlog `loops/L29-implementation-tickets.md`.
+Started 2026-10-21; 30 loops completed 2026-10-21, extended to 35 loops (31-35) the same day; programme complete. Rolling draft PR: https://github.com/MeruLocal/hemmileswebsite_MCP/pull/22. Programme rules: `PROGRAM.md`. Live state: `STATE.md`. Start with `loops/L30-consolidated-handoff.md`, then the backlog `loops/L29-implementation-tickets.md`.
 
 | Loop | File | Headline |
 |---|---|---|
@@ -38,3 +38,4 @@ Started and completed 2026-10-21. Rolling draft PR: https://github.com/MeruLocal
 | 32 | loops/L32-rendering-mobile-performance.md | Lab mobile audit: fast and stable; pricing table hides plans; consent text omits Clarity |
 | 33 | loops/L33-india-competitor-benchmark.md | India price about 5-6x TrackoField; scope mismatch; O16 pricing review |
 | 34 | loops/L34-privacy-terms-read-through.md | Privacy/Terms read: 9 inconsistencies and a counsel checklist |
+| 35 | loops/L35-contradiction-audit.md | 14 contradictions; CMS compliance posts escalated; final backlog 61 tickets |

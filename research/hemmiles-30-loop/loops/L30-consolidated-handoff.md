@@ -101,3 +101,26 @@ Priority C: Brand Radar report (Q62), minimum impression threshold (Q59), templa
 
 ## 10. Status
 Researched/specified: Loops 1-30. Implemented: none. Merged: none. Deployed: none. Measured: none.
+
+## 11. Extension results (loops 31-35, added 2026-10-21)
+Programme extended from 30 to 35 loops at the founder's request; all five were evidence-only loops (no owner input needed). Summary and effect:
+
+| Loop | Result | Effect on handoff |
+|---|---|---|
+| 31 Full crawl | 422 URLs, 0 errors; 37 of 152 sitemap URLs are 307 redirects; `en`/`x-default` hreflang point at redirecting bare URLs on about 340 pages; `/in/partners` canonical loop with no hreflang; 270 indexable non-India market pages outside every sitemap; CMS titles up to 141 characters, no hreflang | Strengthens D03; baseline numbers for the post-deploy recheck (V04/V05) |
+| 32 Rendering/mobile (lab) | Fast and stable (home LCP 1.9 s, CLS 0, no console errors); pricing plan table hides plan columns on phones; banner covers about a fifth of the screen; touch targets and small text; consent banner names only Google Analytics | Adds items to D05, D12, D15; field data still needed (Q70) |
+| 33 India competitors | Hemmiles India prices equal US prices and are about 5-6x the listed TrackoField figures (units differ); India vendors bundle attendance, live tracking, orders, beat plans; Hemmiles claims none; trust badges missing | New owner ticket **O16** (India pricing/packaging); India scope boundaries |
+| 34 Privacy/Terms read | Nine inconsistencies (route suggestions, click IDs vs "not used for advertising", banner vs policy, Cloudflare undisclosed, no entity, Terms silent on trial/seats/renewal, public template notice); 11-item counsel checklist | O02 expanded |
+| 35 Contradiction audit | 14 contradictions/over-claims (K1-K14); highest: route-suggestion wording in three places, zero plan names on non-pricing pages, regulatory-compliance CMS posts (DOT, FLSA, AB5) with no product or entity behind them; 5 under-advertised strengths | O06 escalated; D05/D07/D09 scoped; interim safe step for CMS posts |
+
+### Changes to earlier conclusions
+- Section 2 conflicts: add (10) "lowest price" is not true in India (Loop 33); (11) privacy policy does name Clarity, the banner does not (Loops 32, 34).
+- Section 1 finding 5 (claims unverified) is unchanged; contradiction register K1-K14 lists the specific rows to verify first.
+- Section 6 risks: add (11) regulatory-compliance guidance published without a legal entity or product support (K11) and (12) a premium India price point against bundled attendance/tracking tools (Loop 33).
+- Total backlog: **61 tickets** (see `L29` final note).
+
+### Additional open questions (register continued)
+Q69 deferred-market indexing; Q70 Lighthouse/real-device test; Q71 consent banner in India (counsel); Q72 India price level and packaging; Q73 which India competitors prospects mention; Q74 does the app suggest routes; Q75 ad-click-ID use; Q76 list of data recipients/sub-processors; Q77 origin of mileage/compliance posts and interim noindex.
+
+### Status
+Researched/specified: Loops 1-35. Implemented: none. Merged: none. Deployed: none. Measured: none.

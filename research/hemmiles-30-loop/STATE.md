@@ -2,8 +2,8 @@
 
 - Programme start: 2026-10-21
 - Branch: research/hemmiles-30-loop-2026-10-21 (repo hemmileswebsite_MCP)
-- Next loop to run: 35
-- Loops complete: 34 (of 35 after extension)
+- Next loop to run: none (programme complete at 35)
+- Loops complete: 35 (of 35 after extension)
 
 | Loop | Status | File | Notes |
 |---|---|---|---|
@@ -41,3 +41,4 @@
 | 32 | researched (lab) | loops/L32-rendering-mobile-performance.md | Lab mobile: LCP 1,940 ms home, CLS 0, no console errors, no page h-scroll; pricing plan table hides plan columns on mobile; cookie banner covers ~1/5 screen; consent text names only Google Analytics though Clarity and Cloudflare analytics load; 62/77 targets <44px, 105 text elements <12px; field data still needed |
 | 33 | researched | loops/L33-india-competitor-benchmark.md | India price points are ~4.9x-6.4x TrackoField listed prices (USD 39 vs 8; 32 vs 5; units differ); India vendors bundle attendance, live tracking, orders, beat plans; Hemmiles has none; trust badges missing; new owner ticket O16 (India pricing/packaging); fetch-tool summaries must be re-verified |
 | 34 | researched | loops/L34-privacy-terms-read-through.md | 12 privacy statements checked, 9 inconsistencies (route suggestions, click IDs vs "not used for advertising", banner names only GA, Cloudflare undisclosed, no entity named, Terms silent on trial/seats/renewal, internal template notice visible); 11-item counsel checklist, no drafting |
+| 35 | researched | loops/L35-contradiction-audit.md | 14 contradictions K1-K14 (route suggestions x3, no plan names off pricing, "Orders placed 36%" mockup, absolutes, Ahmedabad on 35 of 38 pages, regulatory-compliance CMS posts); 5 under-advertised strengths; backlog 61 tickets; handoff section 11 added |
