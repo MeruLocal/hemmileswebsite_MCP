@@ -2,8 +2,8 @@
 
 - Programme start: 2026-10-21
 - Branch: research/hemmiles-30-loop-2026-10-21 (repo hemmileswebsite_MCP)
-- Next loop to run: 17
-- Loops complete: 16
+- Next loop to run: 18
+- Loops complete: 17
 
 | Loop | Status | File | Notes |
 |---|---|---|---|
@@ -23,3 +23,4 @@
 | 14 | researched | loops/L14-sales-and-distribution.md | Blueprint A (CRM-connected account visiting, Professional) + B (beat/outlet coverage); KPI definitions fixed; boundary = no orders/stock/invoicing; recurring beat templates unverified; hero mockup implies CRM sync on all plans |
 | 15 | researched | loops/L15-service-industries.md | US service demand 3x sales (field service app 1,700; FSM software 3,100); Hemmiles = visit evidence for teams with an existing job system, NOT FSM (0 mentions of work order/dispatch/parts/invoicing); sign-off undefined; Loop 5/10 revision note; SERP check for Loop 21 |
 | 16 | researched | loops/L16-medical-reps-and-collections.md | Both roles = supported with boundaries, not search-led (mr app 100, payment collection app 100, India); med reps = visit log not compliance/detailing; collections = B2B visit+promise tracking, no payments, not consumer debt; "recovery app" 900 is ambiguous; regulatory claims need counsel |
+| 17 | researched | loops/L17-exhibition-and-vertical-selection.md | Exhibition: US "lead retrieval app" 400 / "trade show lead capture app" 150 at CPC $25-30, but WhatsApp send, ROI widgets, card OCR unverified, plan unstated; 6 use cases consolidated, NO new vertical URLs approved; Phase C complete |
