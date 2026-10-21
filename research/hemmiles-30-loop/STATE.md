@@ -2,8 +2,8 @@
 
 - Programme start: 2026-10-21
 - Branch: research/hemmiles-30-loop-2026-10-21 (repo hemmileswebsite_MCP)
-- Next loop to run: 23
-- Loops complete: 22
+- Next loop to run: 24
+- Loops complete: 23
 
 | Loop | Status | File | Notes |
 |---|---|---|---|
@@ -29,3 +29,4 @@
 | 20 | researched | loops/L20-competitor-benchmarks.md | Hemmiles lowest published price, 3-seat min, no-card trial; missing route optimisation, named CRMs, certifications (BeatRoute/Lystloc show SOC/ISO badges); India SERP top 10 includes DR 2/5/10 sites; 1 comparison candidate (vs Map My Customers, gated on G18); fetch-tool summaries must be re-verified |
 | 21 | researched | loops/L21-keyword-to-url-ownership.md | Ownership register for IN/US; US "field service app" SERP = app stores + platform vendors (no new URL); India format queries real (daily sales report format 350, visit report format 200, dsr format 150) -> template downloads on guides; 0 new URLs approved, 2 approve-ready (CRM checklist, CRM vs FSM guide), 1 candidate (territory planning) |
 | 22 | specified | loops/L22-templates-and-calculators.md | No existing assets in repo; 5 template specs (visit report, field-day plan, offline checklist + DSR + beat/PJP sheet) attach to existing guides; calculator 1 (capacity) in field-day guide, calculator 2 (cost per visit) deferred; DSR SERP = template galleries, intent mismatch risk; Ahrefs SERP cost 630 units |
+| 23 | specified | loops/L23-visuals-case-studies-video.md | 8 visual briefs (V4 time-use and V8 cannot carry numbers without method/calculator); case-study protocol (real vs illustrative separated; /customers noindex until a real story); 3 video scripts need demo workspace; illustrative pharma profile has specific-sounding figures -> keep label; Phase D complete |
