@@ -2,8 +2,8 @@
 
 - Programme start: 2026-10-21
 - Branch: research/hemmiles-30-loop-2026-10-21 (repo hemmileswebsite_MCP)
-- Next loop to run: 27
-- Loops complete: 26
+- Next loop to run: 28
+- Loops complete: 27
 
 | Loop | Status | File | Notes |
 |---|---|---|---|
@@ -33,3 +33,4 @@
 | 24 | researched (blocked on data) | loops/L24-ranking-ctr-opportunities.md | No GSC/Ahrefs data; web spot-checks show no hemmiles.com results (weak evidence); opportunity = indexing/discovery first; pre-GSC checklist, exact first-pull spec, 10 low-confidence hypotheses; Q58 founder must verify GSC |
 | 25 | researched | loops/L25-internal-links.md | Crawl of 113 URLs: product and article silos disconnected (0 feature->article, 0 article->feature links); /in/product only 1 in-body inbound; 3 field posts buried on blog pages 13-14 under 77 CMS posts; every page links to 307-redirecting /privacy,/terms; CMS posts use unprefixed links; exact link plan + 5 template fixes |
 | 26 | researched (baseline 0) | loops/L26-ai-visibility.md | 0 AI citations on all platforms; no Brand Radar report for Hemmiles; buyer-question probe cites GetApp/FitGap and other vendors, not Hemmiles; 16-prompt monthly set; error register E1-E7 (llms.txt "route suggestions", CRM plan gate, mileage/SOC2 CMS posts); Loop 20 "lowest price" claim scoped (Outfield/The Field cheaper per aggregators) |
+| 27 | researched | loops/L27-trust-and-authority.md | CRITICAL: hemmiles.com has no MX/SPF/DMARC (hello@ likely bounces); Privacy 6 + Terms 7 placeholders; no company identity; no certifications/customers; 2 backlinks DR 0; google-site-verification TXT exists (GSC may be verified); trust backlog T1-T10 + 8 legit authority routes |
