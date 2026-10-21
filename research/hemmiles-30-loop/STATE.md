@@ -2,8 +2,8 @@
 
 - Programme start: 2026-10-21
 - Branch: research/hemmiles-30-loop-2026-10-21 (repo hemmileswebsite_MCP)
-- Next loop to run: 9
-- Loops complete: 8
+- Next loop to run: 10
+- Loops complete: 9
 
 | Loop | Status | File | Notes |
 |---|---|---|---|
@@ -15,3 +15,4 @@
 | 6 | researched | loops/L06-canada.md | Decision DEFER as separate market: Ahrefs CA volume 10-20/mo; /ca shows Ahmedabad coordinates; CAD shown but charge raised in USD (wording tension); Quebec needs express-consent/French check by counsel |
 | 7 | researched | loops/L07-united-kingdom.md | Decision VALIDATE (2nd after US). "field service app" 250/mo UK is the standout; /gb still shows Ahmedabad data, no UK data-protection/VAT facts; privacy page blank blocks UK B2B; hosting/DPA unknown |
 | 8 | researched | loops/L08-australia-nz-ireland.md | AU/NZ/IE all DEFER; "field service app" is the only meaningful term (AU 200, NZ 30, IE 10); AUD prices equal CAD figures (check FX); same Ahmedabad data on all three |
+| 9 | researched | loops/L09-singapore-uae.md | SG and AE both DEFER; field service app SG 90 / AE 50; no local facts on pages; readiness rubric introduced (score /14, both 2) for Loop 10 |
