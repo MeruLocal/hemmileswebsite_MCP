@@ -2,8 +2,8 @@
 
 - Programme start: 2026-10-21
 - Branch: research/hemmiles-30-loop-2026-10-21 (repo hemmileswebsite_MCP)
-- Next loop to run: 15
-- Loops complete: 14
+- Next loop to run: 16
+- Loops complete: 15
 
 | Loop | Status | File | Notes |
 |---|---|---|---|
@@ -21,3 +21,4 @@
 | 12 | researched | loops/L12-existing-commercial-pages.md | 31 pages crawled (tags healthy: 1 H1, descriptions 135-161, OG, JSON-LD); weakness = differentiation/proof: team pages ~97% identical, shared H2 on every page, "engineers teams" grammar bug, 0 real screenshots; 10 refresh briefs; mobile not tested |
 | 13 | researched | loops/L13-existing-blogs-and-guides.md | 6 live articles ~300 words, labels 4-6 min (about 3x overstated), no links to features; 5 new guides not live; 77 CMS mileage/SOC2 posts while product pages have 0 mileage mentions -> HOLD, Q10/Q34 owner decision |
 | 14 | researched | loops/L14-sales-and-distribution.md | Blueprint A (CRM-connected account visiting, Professional) + B (beat/outlet coverage); KPI definitions fixed; boundary = no orders/stock/invoicing; recurring beat templates unverified; hero mockup implies CRM sync on all plans |
+| 15 | researched | loops/L15-service-industries.md | US service demand 3x sales (field service app 1,700; FSM software 3,100); Hemmiles = visit evidence for teams with an existing job system, NOT FSM (0 mentions of work order/dispatch/parts/invoicing); sign-off undefined; Loop 5/10 revision note; SERP check for Loop 21 |
