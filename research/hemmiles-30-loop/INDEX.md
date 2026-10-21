@@ -37,3 +37,4 @@ Started and completed 2026-10-21. Rolling draft PR: https://github.com/MeruLocal
 | 31 | loops/L31-full-crawl-pass.md | 422-URL crawl: 37 sitemap redirects, hreflang to redirecting URLs, /partners canonical loop |
 | 32 | loops/L32-rendering-mobile-performance.md | Lab mobile audit: fast and stable; pricing table hides plans; consent text omits Clarity |
 | 33 | loops/L33-india-competitor-benchmark.md | India price about 5-6x TrackoField; scope mismatch; O16 pricing review |
+| 34 | loops/L34-privacy-terms-read-through.md | Privacy/Terms read: 9 inconsistencies and a counsel checklist |

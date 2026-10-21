@@ -2,8 +2,8 @@
 
 - Programme start: 2026-10-21
 - Branch: research/hemmiles-30-loop-2026-10-21 (repo hemmileswebsite_MCP)
-- Next loop to run: 34
-- Loops complete: 33 (of 35 after extension)
+- Next loop to run: 35
+- Loops complete: 34 (of 35 after extension)
 
 | Loop | Status | File | Notes |
 |---|---|---|---|
@@ -40,3 +40,4 @@
 | 31 | researched | loops/L31-full-crawl-pass.md | 422 URLs, 0 errors; 37/152 sitemap URLs 307-redirect; hreflang en/x-default point at redirecting bare URLs (~340 pages); /in/partners canonical loop, no hreflang; 270 indexable market pages outside sitemaps; CMS titles up to 141 chars and no hreflang |
 | 32 | researched (lab) | loops/L32-rendering-mobile-performance.md | Lab mobile: LCP 1,940 ms home, CLS 0, no console errors, no page h-scroll; pricing plan table hides plan columns on mobile; cookie banner covers ~1/5 screen; consent text names only Google Analytics though Clarity and Cloudflare analytics load; 62/77 targets <44px, 105 text elements <12px; field data still needed |
 | 33 | researched | loops/L33-india-competitor-benchmark.md | India price points are ~4.9x-6.4x TrackoField listed prices (USD 39 vs 8; 32 vs 5; units differ); India vendors bundle attendance, live tracking, orders, beat plans; Hemmiles has none; trust badges missing; new owner ticket O16 (India pricing/packaging); fetch-tool summaries must be re-verified |
+| 34 | researched | loops/L34-privacy-terms-read-through.md | 12 privacy statements checked, 9 inconsistencies (route suggestions, click IDs vs "not used for advertising", banner names only GA, Cloudflare undisclosed, no entity named, Terms silent on trial/seats/renewal, internal template notice visible); 11-item counsel checklist, no drafting |

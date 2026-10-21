@@ -54,3 +54,6 @@ Exactly one H1 per page, viewport meta, `lang` set, no layout shift, no console 
 
 ## 6. Next
 Loop 33: India competitor price and feature benchmark (Trackolap, Trackobit, Spoors, PepUpSales, Lystloc, FieldBlaze and similar) from official pages.
+
+## Update from Loop 34 (2026-10-21)
+F3 correction: the **privacy policy does name** Google Analytics, Microsoft Clarity and their cookies (`_ga`, `_clck`, `_clsk`); the gap is the **cookie banner text**, which names only Google Analytics, and the **Cloudflare web-analytics beacon**, which appears in neither the banner nor the policy.

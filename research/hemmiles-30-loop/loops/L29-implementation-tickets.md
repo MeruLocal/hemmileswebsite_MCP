@@ -119,3 +119,6 @@ Loop 30: consolidated handoff - resolve conflicts, select the first release coho
 | ID | Ticket | Priority | Source | Acceptance | Depends |
 |---|---|---|---|---|---|
 | O16 | India pricing and packaging review: are INR 3,500 / 4,500 / 8,000 per user per month (about 5-6x the TrackoField figures, Loop 33) intended; add a pilot offer or lower tier; positioning against attendance/tracking bundles | P1 | L33 | Written decision on India price points, minimums, pilot terms | Q72, O07 |
+
+## Addendum from Loop 34 (2026-10-21)
+O02 (legal pages) now includes the inconsistency list I1-I9 and the 11-item owner/counsel fact checklist in `L34-privacy-terms-read-through.md` section 5-6: route-suggestion wording, "not used for advertising" vs click-ID capture, banner naming only Google Analytics, undisclosed Cloudflare analytics, Enterprise-only location controls, "one legal entity" with none named, Terms silent on trial/minimum seats/renewal, and the internal "template content" notice shown publicly. D12 also covers the consent banner text.
