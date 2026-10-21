@@ -2,8 +2,8 @@
 
 - Programme start: 2026-10-21
 - Branch: research/hemmiles-30-loop-2026-10-21 (repo hemmileswebsite_MCP)
-- Next loop to run: 10
-- Loops complete: 9
+- Next loop to run: 11
+- Loops complete: 10
 
 | Loop | Status | File | Notes |
 |---|---|---|---|
@@ -16,3 +16,4 @@
 | 7 | researched | loops/L07-united-kingdom.md | Decision VALIDATE (2nd after US). "field service app" 250/mo UK is the standout; /gb still shows Ahmedabad data, no UK data-protection/VAT facts; privacy page blank blocks UK B2B; hosting/DPA unknown |
 | 8 | researched | loops/L08-australia-nz-ireland.md | AU/NZ/IE all DEFER; "field service app" is the only meaningful term (AU 200, NZ 30, IE 10); AUD prices equal CAD figures (check FX); same Ahmedabad data on all three |
 | 9 | researched | loops/L09-singapore-uae.md | SG and AE both DEFER; field service app SG 90 / AE 50; no local facts on pages; readiness rubric introduced (score /14, both 2) for Loop 10 |
+| 10 | researched | loops/L10-south-africa-india-market-selection.md | ZA DEFER. India widest measured demand (12 terms 60-350/mo). Recommended execution markets: India + US (UK reserve); others deferred. Scorecard /14 is a tie-breaker (proof/legal all 0). Q26 founder confirm |
