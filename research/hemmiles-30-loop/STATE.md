@@ -2,8 +2,8 @@
 
 - Programme start: 2026-10-21
 - Branch: research/hemmiles-30-loop-2026-10-21 (repo hemmileswebsite_MCP)
-- Next loop to run: 24
-- Loops complete: 23
+- Next loop to run: 25
+- Loops complete: 24
 
 | Loop | Status | File | Notes |
 |---|---|---|---|
@@ -30,3 +30,4 @@
 | 21 | researched | loops/L21-keyword-to-url-ownership.md | Ownership register for IN/US; US "field service app" SERP = app stores + platform vendors (no new URL); India format queries real (daily sales report format 350, visit report format 200, dsr format 150) -> template downloads on guides; 0 new URLs approved, 2 approve-ready (CRM checklist, CRM vs FSM guide), 1 candidate (territory planning) |
 | 22 | specified | loops/L22-templates-and-calculators.md | No existing assets in repo; 5 template specs (visit report, field-day plan, offline checklist + DSR + beat/PJP sheet) attach to existing guides; calculator 1 (capacity) in field-day guide, calculator 2 (cost per visit) deferred; DSR SERP = template galleries, intent mismatch risk; Ahrefs SERP cost 630 units |
 | 23 | specified | loops/L23-visuals-case-studies-video.md | 8 visual briefs (V4 time-use and V8 cannot carry numbers without method/calculator); case-study protocol (real vs illustrative separated; /customers noindex until a real story); 3 video scripts need demo workspace; illustrative pharma profile has specific-sounding figures -> keep label; Phase D complete |
+| 24 | researched (blocked on data) | loops/L24-ranking-ctr-opportunities.md | No GSC/Ahrefs data; web spot-checks show no hemmiles.com results (weak evidence); opportunity = indexing/discovery first; pre-GSC checklist, exact first-pull spec, 10 low-confidence hypotheses; Q58 founder must verify GSC |
