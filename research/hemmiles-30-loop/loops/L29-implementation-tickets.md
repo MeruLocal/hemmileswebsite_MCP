@@ -114,3 +114,8 @@ O01-O02 -> M03/M05 and any outreach. O03 -> D03, C06, V04-V05. O04 -> M01, M08, 
 
 ## 10. Next
 Loop 30: consolidated handoff - resolve conflicts, select the first release cohort, define measurement, and produce the index and 30/60/90-day roadmap; then stop the scheduled job.
+
+## Addendum from Loop 33 (2026-10-21)
+| ID | Ticket | Priority | Source | Acceptance | Depends |
+|---|---|---|---|---|---|
+| O16 | India pricing and packaging review: are INR 3,500 / 4,500 / 8,000 per user per month (about 5-6x the TrackoField figures, Loop 33) intended; add a pilot offer or lower tier; positioning against attendance/tracking bundles | P1 | L33 | Written decision on India price points, minimums, pilot terms | Q72, O07 |
