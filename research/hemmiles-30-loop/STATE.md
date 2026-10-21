@@ -2,8 +2,8 @@
 
 - Programme start: 2026-10-21
 - Branch: research/hemmiles-30-loop-2026-10-21 (repo hemmileswebsite_MCP)
-- Next loop to run: 31
-- Loops complete: 30 (of 35 after extension)
+- Next loop to run: 32
+- Loops complete: 31 (of 35 after extension)
 
 | Loop | Status | File | Notes |
 |---|---|---|---|
@@ -37,3 +37,4 @@
 | 28 | researched (static) | loops/L28-demo-trial-activation.md | CORRECTIONS: GA4 G-95536GJEJ5 + Clarity live in prod HTML; demo form already has crm field. Path A (app.hemmiles.com/signup trial) is a black box (no events, cross-domain unknown); Path B lead pipeline is robust (attribution, 3 sinks, spam control); email DNS affects both; metric glossary + activation proposal + 7 experiments; Q65-Q67 |
 | 29 | drafted | loops/L29-implementation-tickets.md | Backlog: 15 owner (O01-O15), 15 dev/template (D01-D15), 12 content (C01-C12), 5 product (P01-P05), 8 marketing/measurement (M01-M08), 5 verification (V01-V05); wave plan; duplicates consolidated; Q68 assignees |
 | 30 | drafted | loops/L30-consolidated-handoff.md | Handoff: 9 conflicts resolved, cohort 1/2/3, 30/60/90 roadmap, measurement plan, top risks, consolidated question register; INDEX.md added. Implemented/merged/deployed/measured: none |
+| 31 | researched | loops/L31-full-crawl-pass.md | 422 URLs, 0 errors; 37/152 sitemap URLs 307-redirect; hreflang en/x-default point at redirecting bare URLs (~340 pages); /in/partners canonical loop, no hreflang; 270 indexable market pages outside sitemaps; CMS titles up to 141 chars and no hreflang |

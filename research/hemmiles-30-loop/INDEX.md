@@ -34,3 +34,4 @@ Started and completed 2026-10-21. Rolling draft PR: https://github.com/MeruLocal
 | 28 | loops/L28-demo-trial-activation.md | Conversion paths; metric glossary; corrections |
 | 29 | loops/L29-implementation-tickets.md | 60-ticket backlog and wave plan |
 | 30 | loops/L30-consolidated-handoff.md | Summary, conflicts resolved, roadmap, measurement, questions |
+| 31 | loops/L31-full-crawl-pass.md | 422-URL crawl: 37 sitemap redirects, hreflang to redirecting URLs, /partners canonical loop |
