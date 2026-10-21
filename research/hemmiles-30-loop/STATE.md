@@ -2,8 +2,8 @@
 
 - Programme start: 2026-10-21
 - Branch: research/hemmiles-30-loop-2026-10-21 (repo hemmileswebsite_MCP)
-- Next loop to run: 25
-- Loops complete: 24
+- Next loop to run: 26
+- Loops complete: 25
 
 | Loop | Status | File | Notes |
 |---|---|---|---|
@@ -31,3 +31,4 @@
 | 22 | specified | loops/L22-templates-and-calculators.md | No existing assets in repo; 5 template specs (visit report, field-day plan, offline checklist + DSR + beat/PJP sheet) attach to existing guides; calculator 1 (capacity) in field-day guide, calculator 2 (cost per visit) deferred; DSR SERP = template galleries, intent mismatch risk; Ahrefs SERP cost 630 units |
 | 23 | specified | loops/L23-visuals-case-studies-video.md | 8 visual briefs (V4 time-use and V8 cannot carry numbers without method/calculator); case-study protocol (real vs illustrative separated; /customers noindex until a real story); 3 video scripts need demo workspace; illustrative pharma profile has specific-sounding figures -> keep label; Phase D complete |
 | 24 | researched (blocked on data) | loops/L24-ranking-ctr-opportunities.md | No GSC/Ahrefs data; web spot-checks show no hemmiles.com results (weak evidence); opportunity = indexing/discovery first; pre-GSC checklist, exact first-pull spec, 10 low-confidence hypotheses; Q58 founder must verify GSC |
+| 25 | researched | loops/L25-internal-links.md | Crawl of 113 URLs: product and article silos disconnected (0 feature->article, 0 article->feature links); /in/product only 1 in-body inbound; 3 field posts buried on blog pages 13-14 under 77 CMS posts; every page links to 307-redirecting /privacy,/terms; CMS posts use unprefixed links; exact link plan + 5 template fixes |
