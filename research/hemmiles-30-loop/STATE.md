@@ -2,8 +2,8 @@
 
 - Programme start: 2026-10-21
 - Branch: research/hemmiles-30-loop-2026-10-21 (repo hemmileswebsite_MCP)
-- Next loop to run: 18
-- Loops complete: 17
+- Next loop to run: 19
+- Loops complete: 18
 
 | Loop | Status | File | Notes |
 |---|---|---|---|
@@ -24,3 +24,4 @@
 | 15 | researched | loops/L15-service-industries.md | US service demand 3x sales (field service app 1,700; FSM software 3,100); Hemmiles = visit evidence for teams with an existing job system, NOT FSM (0 mentions of work order/dispatch/parts/invoicing); sign-off undefined; Loop 5/10 revision note; SERP check for Loop 21 |
 | 16 | researched | loops/L16-medical-reps-and-collections.md | Both roles = supported with boundaries, not search-led (mr app 100, payment collection app 100, India); med reps = visit log not compliance/detailing; collections = B2B visit+promise tracking, no payments, not consumer debt; "recovery app" 900 is ambiguous; regulatory claims need counsel |
 | 17 | researched | loops/L17-exhibition-and-vertical-selection.md | Exhibition: US "lead retrieval app" 400 / "trade show lead capture app" 150 at CPC $25-30, but WhatsApp send, ROI widgets, card OCR unverified, plan unstated; 6 use cases consolidated, NO new vertical URLs approved; Phase C complete |
+| 18 | researched (spec) | loops/L18-connector-readiness-and-migration.md | Integration unproven: no named connectors; gaps G1-G9 (photos/notes not claimed to sync, no conflict rule, geocoding, retry, identity, back-fill); test matrix T1-T14 incl. offline+owner-change; migration checklist; Gate G18 for any CRM-named page |
