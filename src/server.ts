@@ -17,7 +17,11 @@ export interface BuiltServer {
 
 export function createServer(config: ServerConfig = loadConfig()): BuiltServer {
   const client = new HemmilesClient(config);
-  const sitemap = new SitemapService(client, config.cacheTtlMs || 300000);
+  const sitemap = new SitemapService(
+    client,
+    config.cacheTtlMs || 300000,
+    process.env.HEMMILES_INCLUDE_UNVERIFIED_CMS === "true",
+  );
   const ctx: ToolContext = { client, sitemap, config };
 
   const server = new McpServer(

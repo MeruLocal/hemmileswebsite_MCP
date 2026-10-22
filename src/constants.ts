@@ -97,3 +97,14 @@ export const MAX_SEARCH_FETCH = 24;
 
 export const SERVER_NAME = "hemmiles-mcp-server";
 export const SERVER_VERSION = "1.0.0";
+
+/**
+ * Blog slugs about topics Hemmiles has no product behind (US mileage
+ * reimbursement, IRS rules, hours-of-service, FLSA, AB5, SOC 2). The site's CMS
+ * publishes ~77 such posts; the 2026-10-21 research (Loop 35, K11) flags them as
+ * legal-compliance advice with no product or legal entity backing. They are hidden
+ * from discovery (list/search/resources) unless HEMMILES_INCLUDE_UNVERIFIED_CMS=true.
+ * get_page by explicit path still works.
+ */
+export const UNVERIFIED_BLOG_SLUG_PATTERN =
+  /(mileage|reimburse|hours-of-service|fair-labor|per-diem|expense-report|(^|-)(irs|dot|flsa|ab5|soc-?2)(-|$))/i;
