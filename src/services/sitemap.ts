@@ -5,7 +5,12 @@
  * when the network is unavailable, so page discovery degrades gracefully.
  */
 
-import { BASE_ORIGIN, KNOWN_PAGES, type Locale } from "../constants.js";
+import {
+  BASE_ORIGIN,
+  KNOWN_PAGES,
+  UNVERIFIED_BLOG_SLUG_PATTERN,
+  type Locale,
+} from "../constants.js";
 import { stripLocale } from "../utils/validation.js";
 import { extractSitemapLocs } from "./product-normalizer.js";
 import type { HemmilesClient } from "./hemmiles-client.js";
@@ -48,14 +53,24 @@ function sectionForWithLocaleStripped(canonicalPath: string): string {
   return sectionFor(canonicalPath);
 }
 
+/** True for CMS blog posts on topics the product does not cover (see constants). */
+export function isUnverifiedCmsPost(entry: Pick<PageEntry, "path" | "section">): boolean {
+  if (entry.section !== "blog") return false;
+  const slug = entry.path.split("/").slice(1).join("/");
+  return slug !== "" && UNVERIFIED_BLOG_SLUG_PATTERN.test(slug);
+}
+
 export class SitemapService {
   private readonly client: HemmilesClient;
   private cache: { entries: PageEntry[]; expires: number } | null = null;
   private readonly ttlMs: number;
 
-  constructor(client: HemmilesClient, ttlMs: number) {
+  private readonly includeUnverified: boolean;
+
+  constructor(client: HemmilesClient, ttlMs: number, includeUnverified = false) {
     this.client = client;
     this.ttlMs = ttlMs;
+    this.includeUnverified = includeUnverified;
   }
 
   private fallbackEntries(): PageEntry[] {
@@ -95,7 +110,8 @@ export class SitemapService {
 
       const entries = [...all]
         .map(toEntry)
-        .filter((e): e is PageEntry => e !== null);
+        .filter((e): e is PageEntry => e !== null)
+        .filter((e) => this.includeUnverified || !isUnverifiedCmsPost(e));
 
       if (entries.length === 0) throw new Error("empty sitemap");
 
