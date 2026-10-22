@@ -9,6 +9,7 @@ import { loadConfig, type ServerConfig } from "./config.js";
 import { HemmilesClient } from "./services/hemmiles-client.js";
 import { SitemapService } from "./services/sitemap.js";
 import { registerAllTools, type ToolContext } from "./tools/index.js";
+import { registerPrompts } from "./prompts.js";
 
 export interface BuiltServer {
   server: McpServer;
@@ -35,5 +36,6 @@ export function createServer(config: ServerConfig = loadConfig()): BuiltServer {
   );
 
   registerAllTools(server, ctx);
+  registerPrompts(server);
   return { server, config };
 }
