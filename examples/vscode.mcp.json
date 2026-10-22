@@ -1,0 +1,5 @@
+{
+  "servers": {
+    "hemmiles": { "type": "http", "url": "https://mcp.hemmiles.com/mcp" }
+  }
+}

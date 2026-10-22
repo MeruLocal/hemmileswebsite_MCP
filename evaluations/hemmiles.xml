@@ -1,0 +1,43 @@
+<evaluation>
+  <!-- Answers verified 2026-10-22 against https://hemmiles.com/in/pricing FAQ, /us/pricing, /llms.txt. Re-verify if pricing changes. -->
+  <qa_pair>
+    <question>What is the minimum number of users for the Enterprise plan on Hemmiles? Answer with the number only.</question>
+    <answer>5</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>What is the maximum number of users on the Hemmiles Starter plan? Answer with the number only.</question>
+    <answer>10</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>How many days is the Hemmiles free trial? Answer with the number only.</question>
+    <answer>14</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>By what percentage is annual billing below the monthly rate on Hemmiles? Answer with the number only.</question>
+    <answer>17</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>In India, what is the Professional plan price per user per month in rupees when billed annually? Answer with the number only, no separators.</question>
+    <answer>3700</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>For the United States market, what is the Enterprise plan price in USD per user per month when billed annually? Answer with the number only.</question>
+    <answer>82</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>What support email address does Hemmiles publish?</question>
+    <answer>hello@hemmiles.com</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>How many capabilities are listed in Hemmiles' product feature list (the SoftwareApplication feature list)? Answer with the number only.</question>
+    <answer>9</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Is offline mode included in every Hemmiles plan, including Starter? Answer yes or no.</question>
+    <answer>yes</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>What is the Hemmiles Starter plan price in USD per user per month when billed monthly? Answer with the number only.</question>
+    <answer>39</answer>
+  </qa_pair>
+</evaluation>

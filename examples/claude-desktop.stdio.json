@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "hemmiles": {
+      "command": "node",
+      "args": ["/absolute/path/to/hemmileswebsite_MCP/dist/index.js"],
+      "env": { "HEMMILES_DEFAULT_LOCALE": "us" }
+    }
+  }
+}
