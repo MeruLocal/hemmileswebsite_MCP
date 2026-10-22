@@ -175,6 +175,10 @@ Open `http://localhost:3001/` in a browser to see the landing page. (stdio trans
 
 After restarting, the 🔌 tools menu will list the `hemmiles_*` tools.
 
+## Connect a client
+
+The public endpoint is `https://mcp.hemmiles.com/mcp` (no API key). Per-client snippets (Claude Code, Claude Desktop, Cursor, VS Code, Inspector) are in [docs/CLIENTS.md](docs/CLIENTS.md) with ready-made files in [`examples/`](examples). Buyer questions and the calls that answer them: [docs/BUYER_QUESTIONS.md](docs/BUYER_QUESTIONS.md). Deployment plan: [docs/DEPLOY.md](docs/DEPLOY.md). Evaluation questions: [`evaluations/hemmiles.xml`](evaluations/hemmiles.xml).
+
 ## Configuration
 
 All environment variables are **optional** (no secrets required). See `.env.example`.
