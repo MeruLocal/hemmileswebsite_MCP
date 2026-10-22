@@ -13,7 +13,14 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { createServer } from "./server.js";
 import { SERVER_NAME, SERVER_VERSION } from "./constants.js";
-import { landingPageHtml, versionInfo, discoveryDoc } from "./http-pages.js";
+import {
+  landingPageHtml,
+  versionInfo,
+  discoveryDoc,
+  serverCard,
+  llmsTxt,
+  robotsTxt,
+} from "./http-pages.js";
 
 async function runStdio(): Promise<void> {
   const { server, config } = createServer();
@@ -59,6 +66,21 @@ async function runHttp(): Promise<void> {
         if (path === "/version") {
           res.writeHead(200, { "Content-Type": "application/json" });
           res.end(JSON.stringify(versionInfo(config.defaultLocale)));
+          return;
+        }
+        if (path === "/.well-known/mcp/server-card.json") {
+          res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+          res.end(JSON.stringify(serverCard()));
+          return;
+        }
+        if (path === "/llms.txt") {
+          res.writeHead(200, { "Content-Type": "text/plain; charset=utf-8" });
+          res.end(llmsTxt());
+          return;
+        }
+        if (path === "/robots.txt") {
+          res.writeHead(200, { "Content-Type": "text/plain; charset=utf-8" });
+          res.end(robotsTxt());
           return;
         }
         if (path === "/.well-known/mcp.json") {
