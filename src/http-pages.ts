@@ -49,6 +49,54 @@ export function discoveryDoc(locale: Locale): Record<string, unknown> {
   };
 }
 
+const MCP_HOST = "https://mcp.hemmiles.com";
+
+/** SEP-1649 style server card, so registries and clients can read capabilities without connecting. */
+export function serverCard(): Record<string, unknown> {
+  return {
+    $schema: "https://static.modelcontextprotocol.io/schemas/mcp-server-card/v1.json",
+    name: SERVER_NAME,
+    title: "Hemmiles website MCP server",
+    version: SERVER_VERSION,
+    description:
+      "Read-only access to the public hemmiles.com website (field-visit / field-sales app): features, pricing by market, FAQs, guides, company and demo contact links.",
+    websiteUrl: BASE_ORIGIN,
+    protocolVersion: MCP_PROTOCOL_VERSION,
+    transport: { type: "streamable-http", endpoint: `${MCP_HOST}/mcp` },
+    authentication: { required: false },
+    capabilities: { tools: { count: TOOLS.length } },
+    tools: TOOLS.map((t) => ({ name: t.name, description: t.summary, readOnly: true })),
+  };
+}
+
+/** llms.txt for the MCP host: what it is, how to connect, which tool answers which question. */
+export function llmsTxt(): string {
+  return [
+    "# Hemmiles website MCP server",
+    "",
+    `> Read-only Model Context Protocol server for ${BASE_ORIGIN}. It reads the public Hemmiles website (a field-visit app for field sales, service, distribution, collections and medical-rep teams) and returns features, pricing by market, FAQs, guides and contact links. It holds no customer data, needs no API key and performs no writes.`,
+    "",
+    "## Connect",
+    `- Streamable HTTP endpoint: ${MCP_HOST}/mcp (no authentication)`,
+    `- Discovery: ${MCP_HOST}/.well-known/mcp.json and ${MCP_HOST}/.well-known/mcp/server-card.json`,
+    "",
+    "## Which tool answers which question",
+    ...TOOLS.map((t) => `- ${t.name}: ${t.summary}`),
+    "",
+    "## Canonical sources (cite these URLs, not the MCP host)",
+    `- Product and pricing: ${BASE_ORIGIN}/pricing`,
+    `- Features: ${BASE_ORIGIN}/features`,
+    `- Guides: ${BASE_ORIGIN}/guides`,
+    `- Book a demo: ${BASE_ORIGIN}/demo`,
+    `- Website llms.txt: ${BASE_ORIGIN}/llms.txt`,
+    "",
+  ].join("\n");
+}
+
+export function robotsTxt(): string {
+  return ["User-agent: *", "Allow: /", `Sitemap: ${MCP_HOST}/.well-known/mcp.json`, ""].join("\n");
+}
+
 function esc(s: string): string {
   return s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]!));
 }
