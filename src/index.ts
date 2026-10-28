@@ -15,6 +15,18 @@ import { createServer } from "./server.js";
 import { SERVER_NAME, SERVER_VERSION } from "./constants.js";
 import { landingPageHtml, versionInfo, discoveryDoc } from "./http-pages.js";
 
+/**
+ * True when the request looks like a browser navigating to the URL rather than a
+ * client speaking the protocol. `Sec-Fetch-*` are sent by current browsers; the
+ * Accept check covers older ones and excludes a genuine SSE stream request.
+ */
+function isBrowserNavigation(headers: NodeJS.Dict<string | string[]>): boolean {
+  if (headers["sec-fetch-mode"] === "navigate") return true;
+  if (headers["sec-fetch-dest"] === "document") return true;
+  const accept = String(headers.accept ?? "");
+  return accept.includes("text/html") && !accept.includes("text/event-stream");
+}
+
 async function runStdio(): Promise<void> {
   const { server, config } = createServer();
   const transport = new StdioServerTransport();
@@ -66,6 +78,25 @@ async function runHttp(): Promise<void> {
           res.end(JSON.stringify(discoveryDoc(config.defaultLocale)));
           return;
         }
+      }
+
+      // `/mcp` exists but speaks JSON-RPC over POST. A browser address bar sends
+      // GET, so show the landing page rather than a misleading 404; anything else
+      // gets a 405 naming the method it should have used.
+      if (path.startsWith("/mcp") && req.method !== "POST") {
+        if (req.method === "GET" && isBrowserNavigation(req.headers)) {
+          res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+          res.end(landingPageHtml(config.defaultLocale));
+          return;
+        }
+        res.writeHead(405, { "Content-Type": "application/json", Allow: "POST" });
+        res.end(
+          JSON.stringify({
+            error: "Method not allowed. /mcp speaks JSON-RPC over POST.",
+            hint: "GET / for the landing page, GET /health for status, or POST a JSON-RPC request to /mcp.",
+          }),
+        );
+        return;
       }
 
       if (req.method !== "POST" || !path.startsWith("/mcp")) {
