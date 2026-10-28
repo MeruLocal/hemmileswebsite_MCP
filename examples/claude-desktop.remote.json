@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "hemmiles": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.hemmiles.com/mcp"]
+    }
+  }
+}
