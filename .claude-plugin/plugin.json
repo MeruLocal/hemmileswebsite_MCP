@@ -1,0 +1,9 @@
+{
+  "name": "hemmiles",
+  "description": "Read-only MCP access to public hemmiles.com website content: pages, features, pricing, resources, FAQs and company info.",
+  "version": "1.0.0",
+  "homepage": "https://github.com/MeruLocal/hemmileswebsite_MCP",
+  "repository": "https://github.com/MeruLocal/hemmileswebsite_MCP",
+  "license": "MIT",
+  "keywords": ["mcp", "read-only", "website", "hemmiles"]
+}

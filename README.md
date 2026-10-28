@@ -307,6 +307,26 @@ Hemmiles_MCP/
     ├── client.test.ts  format.test.ts
 ```
 
+## Use as a plugin
+
+This repo ships an Open Plugins component at [`.mcp.json`](./.mcp.json), so any
+MCP client that reads plugin repos can pick the server up directly. It points at
+the hosted, read-only endpoint:
+
+```json
+{
+  "mcpServers": {
+    "hemmiles": {
+      "type": "http",
+      "url": "https://mcp.hemmiles.com/mcp"
+    }
+  }
+}
+```
+
+No API key is required — the server holds no customer data and performs no write
+actions. To run it yourself instead, see the stdio and HTTP instructions above.
+
 ## License
 
 MIT — see [LICENSE](./LICENSE).
